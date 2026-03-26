@@ -153,29 +153,29 @@ Neue `mockAnsprechpartner`-Array mit 2–3 Einträgen für bestehende Mock-Kunde
 export const mockAnsprechpartner: Ansprechpartner[] = [
   {
     id: "ap-1",
-    kunde_id: "1", // Fischer Elektronik KG
-    name: "Klaus Fischer",
+    kunde_id: "1", // Müller & Söhne GmbH (mock-data id "1")
+    name: "Hans Müller",
     position: "Geschäftsführer",
-    telefon: "0711 123456",
-    email: "k.fischer@fischer-elektronik.de",
+    telefon: "089 987654",
+    email: "h.mueller@mueller-soehne.de",
     created_at: "2026-01-10T09:00:00Z",
   },
   {
     id: "ap-2",
-    kunde_id: "1", // Fischer Elektronik KG
+    kunde_id: "1", // Müller & Söhne GmbH
     name: "Petra Bauer",
     position: "Einkaufsleiterin",
-    telefon: "0711 123457",
-    email: "p.bauer@fischer-elektronik.de",
+    telefon: "089 987655",
+    email: "p.bauer@mueller-soehne.de",
     created_at: "2026-01-10T09:05:00Z",
   },
   {
     id: "ap-3",
-    kunde_id: "2", // Müller & Söhne GmbH
-    name: "Hans Müller",
+    kunde_id: "4", // Fischer Elektronik KG (mock-data id "4")
+    name: "Klaus Fischer",
     position: "Inhaber",
-    telefon: "089 987654",
-    email: "h.mueller@mueller-soehne.de",
+    telefon: "0711 123456",
+    email: "k.fischer@fischer-elektronik.de",
     created_at: "2026-01-15T10:00:00Z",
   },
 ];
