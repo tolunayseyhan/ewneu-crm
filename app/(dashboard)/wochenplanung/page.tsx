@@ -285,7 +285,7 @@ export default function WochenplanungPage() {
                           >
                             <div className={`flex items-center gap-1 ${colors.text}`}>
                               <Icon className="w-3 h-3 shrink-0" />
-                              <span className={`text-[11px] font-semibold truncate leading-tight ${ev.status === "erledigt" ? "line-through" : ""}`}>{ev.label}</span>
+                              <span className="text-[11px] font-semibold truncate leading-tight">{ev.label}</span>
                               {ev.status === "erledigt" && <span className="ml-auto text-[9px] font-medium shrink-0">✓</span>}
                             </div>
                             {ev.subLabel && (
