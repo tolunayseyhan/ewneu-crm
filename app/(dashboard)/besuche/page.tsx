@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Check, Plus, Clock, Calendar } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MapPin, Check, Plus, Clock, Calendar, FileText } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NeuerBesuchModal } from "@/components/modals/NeuerBesuchModal";
+import { BerichtErfassenModal } from "@/components/modals/BerichtErfassenModal";
 import { useCRM } from "@/lib/crm-context";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
@@ -14,7 +16,9 @@ import Link from "next/link";
 export default function BesuchePage() {
   const { besuche, addBesuch, markBesuchDone } = useCRM();
   const [mitarbeiterFilter, setMitarbeiterFilter] = useState("alle");
+  const router = useRouter();
   const [showModal, setShowModal] = useState(false);
+  const [showBerichtModal, setShowBerichtModal] = useState(false);
 
   const mitarbeiter = ["alle", ...Array.from(new Set(besuche.map((b) => b.mitarbeiter_name).filter(Boolean)))];
   const filtered = mitarbeiterFilter === "alle" ? besuche : besuche.filter((b) => b.mitarbeiter_name === mitarbeiterFilter);
@@ -46,9 +50,19 @@ export default function BesuchePage() {
               {mitarbeiter.map((m) => (<SelectItem key={m} value={m || "alle"}>{m === "alle" ? "Alle Mitarbeiter" : m}</SelectItem>))}
             </SelectContent>
           </Select>
-          <Button size="sm" className="gap-2" onClick={() => setShowModal(true)}>
-            <Plus className="w-3.5 h-3.5" /> Besuch planen
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/20"
+              onClick={() => setShowBerichtModal(true)}
+            >
+              <FileText className="w-3.5 h-3.5" /> Bericht erfassen
+            </Button>
+            <Button size="sm" className="gap-2" onClick={() => setShowModal(true)}>
+              <Plus className="w-3.5 h-3.5" /> Besuch planen
+            </Button>
+          </div>
         </div>
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
           <table className="w-full text-sm">
@@ -67,7 +81,11 @@ export default function BesuchePage() {
               {filtered.map((besuch) => {
                 const isOverdue = besuch.faellig_am && new Date(besuch.faellig_am) < new Date() && besuch.status === "offen";
                 return (
-                  <tr key={besuch.id} className="hover:bg-muted/30 transition-colors group">
+                  <tr
+                    key={besuch.id}
+                    className="hover:bg-muted/30 transition-colors group cursor-pointer"
+                    onClick={() => router.push(`/besuche/${besuch.id}`)}
+                  >
                     <td className="px-4 py-3.5">
                       {besuch.faellig_am ? <span className={`text-sm font-medium ${isOverdue ? "text-red-500" : "text-foreground"}`}>{formatDate(besuch.faellig_am)}</span> : <span className="text-muted-foreground">–</span>}
                     </td>
@@ -82,7 +100,17 @@ export default function BesuchePage() {
                     <td className="px-4 py-3.5 hidden md:table-cell"><span className="text-xs text-muted-foreground">{besuch.mitarbeiter_name || "–"}</span></td>
                     <td className="px-4 py-3.5 hidden xl:table-cell"><span className="text-xs text-muted-foreground line-clamp-1 max-w-48">{besuch.notizen || "–"}</span></td>
                     <td className="px-4 py-3.5 hidden lg:table-cell"><span className="text-xs text-muted-foreground">{besuch.dauer_minuten ? `${besuch.dauer_minuten} Min.` : "–"}</span></td>
-                    <td className="px-4 py-3.5"><StatusBadge status={besuch.status} /></td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-2">
+                        <StatusBadge status={besuch.status} />
+                        {besuch.bericht && (
+                          <span title="Bericht vorhanden" className="text-xs">📝</span>
+                        )}
+                        {besuch.anhänge && besuch.anhänge.length > 0 && (
+                          <span title={`${besuch.anhänge.length} Anhang/Anhänge`} className="text-xs">📎</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3.5">
                       {besuch.status === "offen" && (
                         <Button variant="ghost" size="sm" onClick={() => markBesuchDone(besuch.id)}
@@ -102,6 +130,7 @@ export default function BesuchePage() {
         </div>
       </div>
       <NeuerBesuchModal open={showModal} onClose={() => setShowModal(false)} onAdd={addBesuch} />
+      <BerichtErfassenModal open={showBerichtModal} onClose={() => setShowBerichtModal(false)} />
     </div>
   );
 }
