@@ -56,9 +56,9 @@ export interface Besuch {
   faellig_am?: string;
   durchgefuehrt_am?: string;
   notizen?: string;
-  dauer_minuten?: number;
   uhrzeit_von?: string;      // "09:30"
   uhrzeit_bis?: string;      // "11:00"
+  dauer_minuten?: number;    // auto-calculated from uhrzeit_von/bis or manual
   bericht?: string;
   anhänge?: Anhang[];
   aufgaben_ids?: string[];
