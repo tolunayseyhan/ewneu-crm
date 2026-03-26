@@ -58,7 +58,19 @@
   }
 }
 
-/* Sidebar scrollbar */
+/* Global button hover effects */
+button,
+[role="button"],
+a {
+  cursor: pointer;
+}
+
+button:not(:disabled):hover,
+[role="button"]:not(:disabled):hover {
+  transition: all 0.15s ease;
+}
+
+/* Sidebar scrollbar – light mode */
 .sidebar-scroll::-webkit-scrollbar {
   width: 4px;
 }
@@ -66,8 +78,11 @@
   background: transparent;
 }
 .sidebar-scroll::-webkit-scrollbar-thumb {
-  background: #1e2130;
+  background: #d1d5db;
   border-radius: 2px;
+}
+.dark .sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #1e2130;
 }
 
 @keyframes fade-in {

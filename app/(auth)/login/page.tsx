@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Flame, Eye, EyeOff, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,11 +43,18 @@ export default function LoginPage() {
         </div>
 
         <div className="relative z-10 text-center max-w-md">
-          <div className="flex items-center justify-center w-20 h-20 rounded-3xl bg-[#E3000F] shadow-2xl shadow-red-900/40 mx-auto mb-8">
-            <Flame className="w-10 h-10 text-white" />
+          <div className="flex items-center justify-center mx-auto mb-8">
+            <Image
+              src="/logo.png"
+              alt="E.W. NEU GmbH"
+              width={120}
+              height={120}
+              className="object-contain drop-shadow-2xl"
+            />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-3">EWNEU CRM</h1>
-          <p className="text-[#94a3b8] text-lg mb-12">
+          <h1 className="text-4xl font-bold text-white mb-2">E.W. NEU GmbH</h1>
+          <p className="text-[#E3000F] font-semibold text-sm tracking-widest uppercase mb-4">CRM System</p>
+          <p className="text-[#94a3b8] text-base mb-12">
             Modernes Customer Relationship Management für Ihr Vertriebsteam
           </p>
 
@@ -70,12 +78,16 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex items-center gap-3 mb-8 lg:hidden">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#E3000F]">
-              <Flame className="w-5 h-5 text-white" />
-            </div>
+            <Image
+              src="/logo.png"
+              alt="E.W. NEU GmbH"
+              width={40}
+              height={40}
+              className="object-contain"
+            />
             <div>
-              <p className="font-bold text-lg leading-tight">EWNEU CRM</p>
-              <p className="text-xs text-muted-foreground">Anmelden</p>
+              <p className="font-bold text-lg leading-tight">E.W. NEU GmbH</p>
+              <p className="text-xs text-muted-foreground">CRM System</p>
             </div>
           </div>
 
@@ -105,7 +117,7 @@ export default function LoginPage() {
                 <Label htmlFor="password">Passwort</Label>
                 <button
                   type="button"
-                  className="text-xs text-[#E3000F] hover:text-[#cc000e] transition-colors"
+                  className="text-xs text-[#E3000F] hover:text-[#cc000e] transition-colors cursor-pointer"
                 >
                   Passwort vergessen?
                 </button>
@@ -123,7 +135,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -143,7 +155,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-10 gap-2"
+              className="w-full h-10 gap-2 cursor-pointer"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? "Anmelden..." : "Anmelden"}
@@ -163,7 +175,7 @@ export default function LoginPage() {
           </div>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            © 2026 EWNEU CRM · Alle Rechte vorbehalten
+            © 2026 E.W. NEU GmbH · Alle Rechte vorbehalten
           </p>
         </div>
       </div>

@@ -288,7 +288,7 @@ export default function EinstellungenPage() {
                 <div>
                   <p className="text-sm font-medium mb-1">Primärfarbe</p>
                   <p className="text-xs text-muted-foreground mb-3">
-                    Aktuelle Farbe: EWNEU Rot (#E3000F)
+                    Aktuelle Farbe: E.W. NEU Rot (#E3000F)
                   </p>
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-[#E3000F] border-2 border-white shadow ring-2 ring-[#E3000F]" />

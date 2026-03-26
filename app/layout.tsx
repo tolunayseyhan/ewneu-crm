@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "EWNEU CRM",
+  title: "E.W. NEU GmbH CRM",
   description: "Modernes CRM-System für den Vertrieb",
 };
 
