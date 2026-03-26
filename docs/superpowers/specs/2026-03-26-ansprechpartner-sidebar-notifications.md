@@ -49,20 +49,30 @@ Der aktive Nav-Item-Stil (`bg-[#E3000F]/10 text-[#E3000F] border border-[#E3000F
 
 ### Lösung
 
-**`NotificationPanel.tsx`:**
-- `NOTIFICATIONS`-Array → `useState<Notification[]>()` initialisiert mit dem bestehenden Array
-- Pro Benachrichtigung: `✕`-Button (erscheint bei Hover), der `setNotifications(prev => prev.filter(n => n.id !== id))` aufruft
-- Footer: zwei Buttons
-  - **„Alle als gelesen markieren"** → setzt `gelesen: true` auf allen
-  - **„Alle löschen"** → leert das Array komplett
-- Wenn keine Benachrichtigungen: Leer-Zustand „Keine Benachrichtigungen" mit Bell-Icon
-
 **`Header.tsx`:**
-- `notifications`-State und Setter nach oben in den Header heben (oder NotificationPanel gibt Count nach oben)
-- Einfacherer Ansatz: Header und NotificationPanel teilen sich den State via Props
-  - Header hält `notifications` State
-  - Übergibt `count={notifications.filter(n => !n.gelesen).length}` als Prop an den Badge
-  - Übergibt `notifications`, `onDelete`, `onMarkAllRead`, `onDeleteAll` an `NotificationPanel`
+- Hält den `notifications`-State (initialisiert mit dem bestehenden Array, jetzt aus `Header.tsx` heraus)
+- Übergibt `count={notifications.filter(n => !n.gelesen).length}` an den Badge (ersetzt die hardcodierte `3`)
+- Übergibt `notifications`, `onDelete`, `onMarkAllRead`, `onDeleteAll` als Props an `<NotificationPanel>`
+
+**`Notification`-Typ** — definiert in `Header.tsx` (nicht in `NotificationPanel.tsx`), da der State dort lebt:
+```typescript
+export interface Notification {
+  id: string;
+  typ: "aufgabe" | "anruf" | "besuch" | "angebot";
+  titel: string;
+  text: string;
+  zeit: string;
+  gelesen: boolean;
+}
+```
+
+**`NotificationPanel.tsx`:**
+- Empfängt `notifications`, `onDelete`, `onMarkAllRead`, `onDeleteAll` als Props (eigener State entfällt)
+- Pro Benachrichtigung: `✕`-Button (erscheint bei Hover), ruft `onDelete(notif.id)` auf
+- Footer: **zwei Buttons** (der bestehende Footer-Button-Bereich wird vollständig ersetzt):
+  - **„Alle als gelesen markieren"** → ruft `onMarkAllRead()` auf
+  - **„Alle löschen"** → ruft `onDeleteAll()` auf
+- Wenn `notifications.length === 0`: Leer-Zustand mit Bell-Icon und Text „Keine Benachrichtigungen"
 
 **Interface:**
 ```typescript
@@ -73,18 +83,6 @@ interface NotificationPanelProps {
   onDelete: (id: string) => void;
   onMarkAllRead: () => void;
   onDeleteAll: () => void;
-}
-```
-
-**`Notification`-Typ** (lokal in `NotificationPanel.tsx` oder `Header.tsx`):
-```typescript
-interface Notification {
-  id: string;
-  typ: "aufgabe" | "anruf" | "besuch" | "angebot";
-  titel: string;
-  text: string;
-  zeit: string;
-  gelesen: boolean;
 }
 ```
 
@@ -185,25 +183,47 @@ export const mockAnsprechpartner: Ansprechpartner[] = [
 
 ### 3.5 Besuche-Modals
 
-**`BerichtErfassenModal.tsx` und `NeuerBesuchModal.tsx`:**
+#### `BerichtErfassenModal.tsx`
 
-- `const MITARBEITER = [...]` und den zugehörigen `<Select>` entfernen
-- Neues Feld „Ansprechpartner" (optional):
-  - Wird erst nach Kunden-Auswahl befüllbar (vorher disabled/placeholder „Zuerst Kunde wählen")
-  - Filtert `ansprechpartner` aus CRM Context nach `a.kunde_id === kundeId`
-  - Wenn keine Ansprechpartner für diesen Kunden: `SelectItem` deaktiviert mit Text „Kein Ansprechpartner hinterlegt"
+Bereits mit `useCRM()` verbunden. Änderungen:
+
+- `const MITARBEITER = [...]` entfernen
+- `const { addBesuch } = useCRM()` → erweitern auf `const { addBesuch, ansprechpartner } = useCRM()`
+- State: `const [ansprechpartnerId, setAnsprechpartnerId] = useState("")`
+- Computed: `const kundenAnsprechpartner = ansprechpartner.filter(a => a.kunde_id === kundeId)`
+- Mitarbeiter-Select durch Ansprechpartner-Select ersetzen:
+  - Disabled solange kein `kundeId` gewählt (placeholder „Zuerst Kunde wählen")
+  - Wenn `kundenAnsprechpartner.length === 0` und Kunde gewählt: ein deaktiviertes Item „Kein Ansprechpartner hinterlegt"
   - Auswahl speichert `ansprechpartner_id` + `ansprechpartner_name` auf dem Besuch-Objekt
+- `resetForm()` erhält `setAnsprechpartnerId("")` — dieser Reset wird sowohl vom Submit-Handler als auch vom `onOpenChange`-Handler (Schließen via ESC/Backdrop) aufgerufen
 
-State in den Modals:
+#### `NeuerBesuchModal.tsx`
+
+Aktuell **kein** `useCRM()`-Aufruf — nutzt stattdessen `mockKunden` direkt und erhält `onAdd` als Prop. Lösung: `useCRM()` wird hinzugefügt, um `ansprechpartner` zu lesen:
+
 ```typescript
-const [ansprechpartnerId, setAnsprechpartnerId] = useState("");
+// Vor der Änderung:
+// keine useCRM() Nutzung
 
-const kundenAnsprechpartner = ansprechpartner.filter(
-  (a) => a.kunde_id === kundeId
-);
+// Nach der Änderung:
+import { useCRM } from "@/lib/crm-context";
+// ...
+const { ansprechpartner } = useCRM();
 ```
 
-Beim Formular-Reset: `setAnsprechpartnerId("")` mit aufnehmen.
+Der bestehende `onAdd`-Prop-Mechanismus bleibt unverändert — es wird nur lesend auf `ansprechpartner` zugegriffen. Gleiche Implementierung wie in `BerichtErfassenModal`: filter by `kundeId`, Ansprechpartner-Select, reset bei `onOpenChange`.
+
+#### Gemeinsame Änderungen an `Besuch`-Erstellung
+
+In beiden Modals wird das erstellte `Besuch`-Objekt erweitert:
+```typescript
+ansprechpartner_id: ansprechpartnerId || undefined,
+ansprechpartner_name: ansprechpartnerId
+  ? kundenAnsprechpartner.find(a => a.id === ansprechpartnerId)?.name
+  : undefined,
+```
+
+`mitarbeiter_id` und `mitarbeiter_name` bleiben im `Besuch`-Interface erhalten (bestehende Mock-Daten haben diese Felder gefüllt), werden aber in den Modals nicht mehr gesetzt. Sie werden in einer späteren Phase entfernt, sobald alle Altdaten migriert sind.
 
 **Betroffene Dateien:**
 - `lib/types.ts`
@@ -272,10 +292,17 @@ interface Props {
 
 ### 4.2 Integration in `kunden/[id]/page.tsx`
 
+`app/(dashboard)/kunden/[id]/page.tsx` ist eine **Server Component** (kein `"use client"`). Das ist kein Problem — ein Server Component kann Client Components rendern. Dieses Muster ist bereits durch `KundenBesucheTab` etabliert.
+
 - Import `KundenAnsprechpartnerTab`
 - Neuer `TabsTrigger value="ansprechpartner"`: „Ansprechpartner"
 - Neuer `TabsContent value="ansprechpartner"`: `<KundenAnsprechpartnerTab kundeId={id} />`
 - Tab erscheint zwischen „Besuche" und „Angebote"
+
+**Import in `lib/crm-context.tsx`:** Die Import-Zeile muss `mockAnsprechpartner` einschließen:
+```typescript
+import { mockAufgaben, mockAnrufe, mockBesuche, mockAnsprechpartner } from "./mock-data";
+```
 
 **Betroffene Dateien:**
 - `components/kunden/KundenAnsprechpartnerTab.tsx` (NEU)
