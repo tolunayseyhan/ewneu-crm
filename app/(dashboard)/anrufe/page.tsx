@@ -6,28 +6,13 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { NeuerAnrufModal } from "@/components/modals/NeuerAnrufModal";
-import { mockAnrufe } from "@/lib/mock-data";
+import { useCRM } from "@/lib/crm-context";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
-import type { Anruf } from "@/lib/types";
 
 export default function AnrufePage() {
-  const [anrufe, setAnrufe] = useState<Anruf[]>(mockAnrufe);
+  const { anrufe, addAnruf, markAnrufDone } = useCRM();
   const [showModal, setShowModal] = useState(false);
-
-  const markAsDone = (id: string) => {
-    setAnrufe((prev) =>
-      prev.map((a) =>
-        a.id === id
-          ? { ...a, status: "erledigt" as const, durchgefuehrt_am: new Date().toISOString() }
-          : a
-      )
-    );
-  };
-
-  const handleAdd = (anruf: Anruf) => {
-    setAnrufe((prev) => [anruf, ...prev]);
-  };
 
   const offene = anrufe.filter((a) => a.status === "offen");
   const erledigte = anrufe.filter((a) => a.status === "erledigt");
@@ -37,7 +22,6 @@ export default function AnrufePage() {
       <Header title="Anrufe" subtitle={`${offene.length} fällige Anrufe`} />
 
       <div className="p-6 space-y-6">
-        {/* Quick Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <div className="rounded-2xl border border-border bg-card p-4">
             <div className="flex items-center gap-2 mb-1">
@@ -69,7 +53,6 @@ export default function AnrufePage() {
           </Button>
         </div>
 
-        {/* Table */}
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
@@ -85,10 +68,7 @@ export default function AnrufePage() {
             </thead>
             <tbody className="divide-y divide-border">
               {anrufe.map((anruf) => {
-                const isOverdue =
-                  anruf.faellig_am &&
-                  new Date(anruf.faellig_am) < new Date() &&
-                  anruf.status === "offen";
+                const isOverdue = anruf.faellig_am && new Date(anruf.faellig_am) < new Date() && anruf.status === "offen";
                 return (
                   <tr key={anruf.id} className="hover:bg-muted/30 transition-colors group">
                     <td className="px-4 py-3.5">
@@ -96,9 +76,7 @@ export default function AnrufePage() {
                         <span className={`text-sm font-medium ${isOverdue ? "text-red-500" : "text-foreground"}`}>
                           {formatDate(anruf.faellig_am)}
                         </span>
-                      ) : (
-                        <span className="text-muted-foreground">–</span>
-                      )}
+                      ) : <span className="text-muted-foreground">–</span>}
                     </td>
                     <td className="px-4 py-3.5">
                       {anruf.kunde ? (
@@ -106,19 +84,14 @@ export default function AnrufePage() {
                           <p className="font-medium text-foreground">{anruf.kunde.name1}</p>
                           <p className="text-xs text-muted-foreground">{anruf.kunde.ort}</p>
                         </Link>
-                      ) : (
-                        <span className="text-muted-foreground">–</span>
-                      )}
+                      ) : <span className="text-muted-foreground">–</span>}
                     </td>
                     <td className="px-4 py-3.5 hidden md:table-cell">
                       {anruf.kunde?.telefon ? (
                         <a href={`tel:${anruf.kunde.telefon}`} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#E3000F] transition-colors">
-                          <Phone className="w-3.5 h-3.5" />
-                          {anruf.kunde.telefon}
+                          <Phone className="w-3.5 h-3.5" />{anruf.kunde.telefon}
                         </a>
-                      ) : (
-                        <span className="text-muted-foreground">–</span>
-                      )}
+                      ) : <span className="text-muted-foreground">–</span>}
                     </td>
                     <td className="px-4 py-3.5 hidden lg:table-cell">
                       <span className="text-xs text-muted-foreground">{anruf.mitarbeiter_name || "–"}</span>
@@ -129,12 +102,8 @@ export default function AnrufePage() {
                     <td className="px-4 py-3.5"><StatusBadge status={anruf.status} /></td>
                     <td className="px-4 py-3.5">
                       {anruf.status === "offen" && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => markAsDone(anruf.id)}
-                          className="h-7 text-xs gap-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => markAnrufDone(anruf.id)}
+                          className="h-7 text-xs gap-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Check className="w-3.5 h-3.5" /> Erledigt
                         </Button>
                       )}
@@ -150,11 +119,7 @@ export default function AnrufePage() {
         </div>
       </div>
 
-      <NeuerAnrufModal
-        open={showModal}
-        onClose={() => setShowModal(false)}
-        onAdd={handleAdd}
-      />
+      <NeuerAnrufModal open={showModal} onClose={() => setShowModal(false)} onAdd={addAnruf} />
     </div>
   );
 }

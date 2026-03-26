@@ -23,21 +23,22 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { NeueAufgabeModal } from "@/components/modals/NeueAufgabeModal";
 import { NeuerAnrufModal } from "@/components/modals/NeuerAnrufModal";
 import { NeuerBesuchModal } from "@/components/modals/NeuerBesuchModal";
-import { mockAufgaben, mockAnrufe, mockBesuche, mockAngebote, mockKunden } from "@/lib/mock-data";
+import { mockAngebote, mockKunden } from "@/lib/mock-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import type { Aufgabe, Anruf, Besuch } from "@/lib/types";
+import { useCRM } from "@/lib/crm-context";
 
 export default function DashboardPage() {
+  const { aufgaben, anrufe, besuche, addAufgabe, addAnruf, addBesuch } = useCRM();
   const [showAufgabeModal, setShowAufgabeModal] = useState(false);
   const [showAnrufModal, setShowAnrufModal] = useState(false);
   const [showBesuchModal, setShowBesuchModal] = useState(false);
 
-  const offeneAufgaben = mockAufgaben.filter((a) => a.status !== "erledigt").length;
-  const faelligeAnrufe = mockAnrufe.filter((a) => a.status === "offen").length;
-  const faelligeBesuche = mockBesuche.filter((b) => b.status === "offen").length;
+  const offeneAufgaben = aufgaben.filter((a) => a.status !== "erledigt").length;
+  const faelligeAnrufe = anrufe.filter((a) => a.status === "offen").length;
+  const faelligeBesuche = besuche.filter((b) => b.status === "offen").length;
   const gesamtumsatz = mockKunden.reduce((sum, k) => sum + (k.umsatz || 0), 0);
 
-  const upcomingTasks = mockAufgaben
+  const upcomingTasks = aufgaben
     .filter((a) => a.status !== "erledigt" && a.faellig_am)
     .sort((a, b) => new Date(a.faellig_am!).getTime() - new Date(b.faellig_am!).getTime())
     .slice(0, 4);
@@ -51,6 +52,7 @@ export default function DashboardPage() {
   const wochenKontakte = mockKunden.filter(
     (k) => k.letzte_aktivitaet && new Date(k.letzte_aktivitaet) >= weekStart
   ).length;
+
 
   return (
     <div>
@@ -223,9 +225,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Modals */}
-      <NeueAufgabeModal open={showAufgabeModal} onClose={() => setShowAufgabeModal(false)} onAdd={(_a: Aufgabe) => {}} />
-      <NeuerAnrufModal open={showAnrufModal} onClose={() => setShowAnrufModal(false)} onAdd={(_a: Anruf) => {}} />
-      <NeuerBesuchModal open={showBesuchModal} onClose={() => setShowBesuchModal(false)} onAdd={(_b: Besuch) => {}} />
+      <NeueAufgabeModal open={showAufgabeModal} onClose={() => setShowAufgabeModal(false)} onAdd={addAufgabe} />
+      <NeuerAnrufModal open={showAnrufModal} onClose={() => setShowAnrufModal(false)} onAdd={addAnruf} />
+      <NeuerBesuchModal open={showBesuchModal} onClose={() => setShowBesuchModal(false)} onAdd={addBesuch} />
     </div>
   );
 }

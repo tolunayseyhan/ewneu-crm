@@ -13,6 +13,7 @@ import {
   BarChart3,
   Settings,
   ChevronRight,
+  CalendarDays,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -22,6 +23,11 @@ const navItems = [
     label: "Dashboard",
     href: "/",
     icon: LayoutDashboard,
+  },
+  {
+    label: "Wochenplanung",
+    href: "/wochenplanung",
+    icon: CalendarDays,
   },
   {
     label: "Kunden",
