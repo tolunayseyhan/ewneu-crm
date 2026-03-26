@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { mockAufgaben, mockAnrufe, mockBesuche } from "./mock-data";
-import type { Aufgabe, Anruf, Besuch } from "./types";
+import type { Aufgabe, Anruf, Besuch, Anhang } from "./types";
 
 interface CRMContextType {
   aufgaben: Aufgabe[];
@@ -14,6 +14,9 @@ interface CRMContextType {
   markAnrufDone: (id: string) => void;
   markBesuchDone: (id: string) => void;
   markAufgabeDone: (id: string) => void;
+  updateBesuch: (id: string, updates: Partial<Besuch>) => void;
+  addAnhangToBesuch: (besuchId: string, anhang: Anhang) => void;
+  removeAnhangFromBesuch: (besuchId: string, anhangId: string) => void;
 }
 
 const CRMContext = createContext<CRMContextType | null>(null);
@@ -54,9 +57,32 @@ export function CRMProvider({ children }: { children: ReactNode }) {
       )
     );
 
+  const updateBesuch = (id: string, updates: Partial<Besuch>) =>
+    setBesuche((prev) =>
+      prev.map((b) => (b.id === id ? { ...b, ...updates } : b))
+    );
+
+  const addAnhangToBesuch = (besuchId: string, anhang: Anhang) =>
+    setBesuche((prev) =>
+      prev.map((b) =>
+        b.id === besuchId
+          ? { ...b, anhänge: [...(b.anhänge || []), anhang] }
+          : b
+      )
+    );
+
+  const removeAnhangFromBesuch = (besuchId: string, anhangId: string) =>
+    setBesuche((prev) =>
+      prev.map((b) =>
+        b.id === besuchId
+          ? { ...b, anhänge: (b.anhänge || []).filter((a) => a.id !== anhangId) }
+          : b
+      )
+    );
+
   return (
     <CRMContext.Provider
-      value={{ aufgaben, anrufe, besuche, addAufgabe, addAnruf, addBesuch, markAnrufDone, markBesuchDone, markAufgabeDone }}
+      value={{ aufgaben, anrufe, besuche, addAufgabe, addAnruf, addBesuch, markAnrufDone, markBesuchDone, markAufgabeDone, updateBesuch, addAnhangToBesuch, removeAnhangFromBesuch }}
     >
       {children}
     </CRMContext.Provider>
