@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   ArrowLeft, Clock, User, MapPin, CheckCircle2, Plus,
   Paperclip, Trash2, FileText, Calendar, ExternalLink,
@@ -67,6 +67,25 @@ export default function BesuchDetailPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
+  const handleFiles = useCallback((files: FileList | null) => {
+    if (!files || !besuch) return;
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const anhang: Anhang = {
+          id: `anhang-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          name: file.name,
+          size: file.size,
+          mime: file.type,
+          data_url: e.target?.result as string,
+          created_at: new Date().toISOString(),
+        };
+        addAnhangToBesuch(besuch.id, anhang);
+      };
+      reader.readAsDataURL(file);
+    });
+  }, [besuch, addAnhangToBesuch]);
+
   if (!besuch) {
     return (
       <div className="p-6">
@@ -99,25 +118,6 @@ export default function BesuchDetailPage() {
     setBerichtSaved(true);
     setTimeout(() => setBerichtSaved(false), 2000);
   };
-
-  const handleFiles = useCallback((files: FileList | null) => {
-    if (!files) return;
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const anhang: Anhang = {
-          id: `anhang-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          name: file.name,
-          size: file.size,
-          mime: file.type,
-          data_url: e.target?.result as string,
-          created_at: new Date().toISOString(),
-        };
-        addAnhangToBesuch(besuch.id, anhang);
-      };
-      reader.readAsDataURL(file);
-    });
-  }, [besuch.id, addAnhangToBesuch]);
 
   const handleAddAufgabe = () => {
     if (!aufgabeTitel.trim()) return;
