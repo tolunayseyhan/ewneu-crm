@@ -1,4 +1,4 @@
-import type { Kunde, Aufgabe, Anruf, Besuch, Angebot, Aktivitaet } from "./types";
+import type { Kunde, Aufgabe, Anruf, Besuch, Angebot, Aktivitaet, Ansprechpartner } from "./types";
 
 export const mockKunden: Kunde[] = [
   {
@@ -606,4 +606,43 @@ export const mockMitarbeiterStats = [
   { name: "Sandra Koch", anrufe: 35, besuche: 18 },
   { name: "Jan Hofmann", anrufe: 22, besuche: 9 },
   { name: "Maria Schulz", anrufe: 41, besuche: 15 },
+];
+
+export const mockAnsprechpartner: Ansprechpartner[] = [
+  {
+    id: "ap-1",
+    kunde_id: "1", // Müller & Söhne GmbH
+    name: "Hans Müller",
+    position: "Geschäftsführer",
+    telefon: "+49 211 884 201",
+    email: "h.mueller@mueller-soehne.de",
+    created_at: "2026-01-10T09:00:00Z",
+  },
+  {
+    id: "ap-2",
+    kunde_id: "1", // Müller & Söhne GmbH
+    name: "Petra Bauer",
+    position: "Einkaufsleiterin",
+    telefon: "+49 211 884 202",
+    email: "p.bauer@mueller-soehne.de",
+    created_at: "2026-01-10T09:05:00Z",
+  },
+  {
+    id: "ap-3",
+    kunde_id: "4", // Fischer Elektronik KG
+    name: "Klaus Fischer",
+    position: "Inhaber",
+    telefon: "+49 231 995 101",
+    email: "k.fischer@fischer-elektronik.de",
+    created_at: "2026-01-15T10:00:00Z",
+  },
+  {
+    id: "ap-4",
+    kunde_id: "4", // Fischer Elektronik KG
+    name: "Sabine Krause",
+    position: "Technische Leiterin",
+    telefon: "+49 231 995 102",
+    email: "s.krause@fischer-elektronik.de",
+    created_at: "2026-01-15T10:10:00Z",
+  },
 ];

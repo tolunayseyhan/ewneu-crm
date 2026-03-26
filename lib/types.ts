@@ -62,6 +62,8 @@ export interface Besuch {
   bericht?: string;
   anhänge?: Anhang[];
   aufgaben_ids?: string[];
+  ansprechpartner_id?: string;
+  ansprechpartner_name?: string;
   status: "offen" | "erledigt";
   created_at: string;
 }
@@ -105,4 +107,15 @@ export interface Mitarbeiter {
   email: string;
   rolle: string;
   avatar?: string;
+}
+
+export interface Ansprechpartner {
+  id: string;
+  kunde_id: string;
+  name: string;
+  position?: string;
+  telefon?: string;
+  email?: string;
+  notiz?: string;
+  created_at: string;
 }
