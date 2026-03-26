@@ -59,6 +59,15 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
     return diff > 0 ? diff : undefined;
   };
 
+  const resetForm = () => {
+    setKundeId("");
+    setDatum(today);
+    setUhrzeitVon("");
+    setUhrzeitBis("");
+    setMitarbeiter("Thomas Berger");
+    setNotizen("");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!kundeId || !datum) return;
@@ -67,6 +76,7 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
 
     const kunde = mockKunden.find((k) => k.id === kundeId);
     const id = `besuch-${Date.now()}`;
+    const dauer = calcDauer();
     const newBesuch: Besuch = {
       id,
       kunde_id: kundeId,
@@ -75,7 +85,7 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
       durchgefuehrt_am: datum,
       uhrzeit_von: uhrzeitVon || undefined,
       uhrzeit_bis: uhrzeitBis || undefined,
-      dauer_minuten: calcDauer(),
+      dauer_minuten: dauer,
       notizen: notizen || undefined,
       status: "erledigt",
       created_at: new Date().toISOString(),
@@ -84,20 +94,14 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
     addBesuch(newBesuch);
     setSaving(false);
 
-    // Reset form
-    setKundeId("");
-    setDatum(today);
-    setUhrzeitVon("");
-    setUhrzeitBis("");
-    setMitarbeiter("Thomas Berger");
-    setNotizen("");
+    resetForm();
 
     onClose();
     router.push(`/besuche/${id}`);
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+    <Dialog open={open} onOpenChange={(o) => { if (!o) { resetForm(); onClose(); } }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -166,11 +170,14 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
           </div>
 
           {/* Dauer preview */}
-          {calcDauer() && (
-            <p className="text-xs text-muted-foreground -mt-1">
-              Dauer: {calcDauer()} Minuten
-            </p>
-          )}
+          {(() => {
+            const dauer = calcDauer();
+            return dauer && (
+              <p className="text-xs text-muted-foreground -mt-1">
+                Dauer: {dauer} Minuten
+              </p>
+            );
+          })()}
 
           {/* Mitarbeiter */}
           <div className="space-y-1.5">
