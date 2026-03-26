@@ -57,7 +57,21 @@ export interface Besuch {
   durchgefuehrt_am?: string;
   notizen?: string;
   dauer_minuten?: number;
+  uhrzeit_von?: string;      // "09:30"
+  uhrzeit_bis?: string;      // "11:00"
+  bericht?: string;
+  anhänge?: Anhang[];
+  aufgaben_ids?: string[];
   status: "offen" | "erledigt";
+  created_at: string;
+}
+
+export interface Anhang {
+  id: string;
+  name: string;         // Dateiname z.B. "Protokoll.pdf"
+  size: number;         // Bytes
+  mime: string;         // MIME-Type z.B. "application/pdf"
+  data_url: string;     // Base64-kodierter Inhalt (in-memory, kein Backend)
   created_at: string;
 }
 
