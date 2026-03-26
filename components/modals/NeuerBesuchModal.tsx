@@ -3,31 +3,17 @@
 import { useState } from "react";
 import { MapPin } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { mockKunden } from "@/lib/mock-data";
+import { useCRM } from "@/lib/crm-context";
 import type { Besuch } from "@/lib/types";
-
-const MITARBEITER = [
-  { id: "1", name: "Thomas Berger" },
-  { id: "2", name: "Sandra Koch" },
-  { id: "3", name: "Jan Hofmann" },
-  { id: "4", name: "Maria Schulz" },
-];
 
 interface Props {
   open: boolean;
@@ -37,13 +23,18 @@ interface Props {
 }
 
 export function NeuerBesuchModal({ open, onClose, onAdd, defaultKundeId }: Props) {
+  const { ansprechpartner } = useCRM();
+
   const [kundeId, setKundeId] = useState(defaultKundeId || "");
   const [faelligAm, setFaelligAm] = useState("");
-  const [mitarbeiter, setMitarbeiter] = useState("Thomas Berger");
   const [dauer, setDauer] = useState("60");
+  const [ansprechpartnerId, setAnsprechpartnerId] = useState("");
   const [notizen, setNotizen] = useState("");
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const kundenAnsprechpartner = ansprechpartner.filter((a) => a.kunde_id === kundeId);
+  const selectedKunde = mockKunden.find((k) => k.id === kundeId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,14 +43,16 @@ export function NeuerBesuchModal({ open, onClose, onAdd, defaultKundeId }: Props
     await new Promise((r) => setTimeout(r, 400));
 
     const kunde = mockKunden.find((k) => k.id === kundeId);
+    const selectedAP = kundenAnsprechpartner.find((a) => a.id === ansprechpartnerId);
     const newBesuch: Besuch = {
       id: `besuch-${Date.now()}`,
       kunde_id: kundeId,
       kunde: kunde || undefined,
-      mitarbeiter_name: mitarbeiter,
       faellig_am: faelligAm || undefined,
       notizen: notizen || undefined,
       dauer_minuten: dauer ? parseInt(dauer) : undefined,
+      ansprechpartner_id: ansprechpartnerId || undefined,
+      ansprechpartner_name: selectedAP?.name || undefined,
       status: "offen",
       created_at: new Date().toISOString(),
     };
@@ -71,14 +64,12 @@ export function NeuerBesuchModal({ open, onClose, onAdd, defaultKundeId }: Props
       setSuccess(false);
       setKundeId(defaultKundeId || "");
       setFaelligAm("");
-      setMitarbeiter("Thomas Berger");
       setDauer("60");
+      setAnsprechpartnerId("");
       setNotizen("");
       onClose();
     }, 800);
   };
-
-  const selectedKunde = mockKunden.find((k) => k.id === kundeId);
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -94,18 +85,13 @@ export function NeuerBesuchModal({ open, onClose, onAdd, defaultKundeId }: Props
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-1">
           <div className="space-y-1.5">
-            <Label>
-              Kunde <span className="text-red-500">*</span>
-            </Label>
-            <Select value={kundeId} onValueChange={setKundeId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Kunde wählen" />
-              </SelectTrigger>
+            <Label>Kunde <span className="text-red-500">*</span></Label>
+            <Select value={kundeId} onValueChange={(v) => { setKundeId(v); setAnsprechpartnerId(""); }}>
+              <SelectTrigger><SelectValue placeholder="Kunde wählen" /></SelectTrigger>
               <SelectContent>
                 {mockKunden.map((k) => (
                   <SelectItem key={k.id} value={k.id}>
-                    {k.name1}
-                    {k.ort ? ` · ${k.ort}` : ""}
+                    {k.name1}{k.ort ? ` · ${k.ort}` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -131,7 +117,6 @@ export function NeuerBesuchModal({ open, onClose, onAdd, defaultKundeId }: Props
                 onChange={(e) => setFaelligAm(e.target.value)}
               />
             </div>
-
             <div className="space-y-1.5">
               <Label htmlFor="dauer">Dauer (Min.)</Label>
               <Input
@@ -146,18 +131,29 @@ export function NeuerBesuchModal({ open, onClose, onAdd, defaultKundeId }: Props
             </div>
           </div>
 
+          {/* Ansprechpartner */}
           <div className="space-y-1.5">
-            <Label>Mitarbeiter</Label>
-            <Select value={mitarbeiter} onValueChange={setMitarbeiter}>
+            <Label>Ansprechpartner</Label>
+            <Select
+              value={ansprechpartnerId}
+              onValueChange={setAnsprechpartnerId}
+              disabled={!kundeId}
+            >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder={!kundeId ? "Zuerst Kunde wählen" : "Ansprechpartner wählen"} />
               </SelectTrigger>
               <SelectContent>
-                {MITARBEITER.map((m) => (
-                  <SelectItem key={m.id} value={m.name}>
-                    {m.name}
+                {kundenAnsprechpartner.length === 0 ? (
+                  <SelectItem value="__none__" disabled>
+                    Kein Ansprechpartner hinterlegt
                   </SelectItem>
-                ))}
+                ) : (
+                  kundenAnsprechpartner.map((ap) => (
+                    <SelectItem key={ap.id} value={ap.id}>
+                      {ap.name}{ap.position ? ` · ${ap.position}` : ""}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -168,7 +164,7 @@ export function NeuerBesuchModal({ open, onClose, onAdd, defaultKundeId }: Props
               id="notizen"
               value={notizen}
               onChange={(e) => setNotizen(e.target.value)}
-              placeholder="Besuchsziel, Themen, Ansprechpartner..."
+              placeholder="Besuchsziel, Themen..."
               className="w-full min-h-[80px] rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
             />
           </div>

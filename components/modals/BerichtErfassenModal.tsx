@@ -4,32 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { mockKunden } from "@/lib/mock-data";
 import { useCRM } from "@/lib/crm-context";
 import type { Besuch } from "@/lib/types";
-
-const MITARBEITER = [
-  { id: "1", name: "Thomas Berger" },
-  { id: "2", name: "Sandra Koch" },
-  { id: "3", name: "Jan Hofmann" },
-  { id: "4", name: "Maria Schulz" },
-];
 
 interface Props {
   open: boolean;
@@ -38,7 +23,7 @@ interface Props {
 
 export function BerichtErfassenModal({ open, onClose }: Props) {
   const router = useRouter();
-  const { addBesuch } = useCRM();
+  const { addBesuch, ansprechpartner } = useCRM();
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -46,11 +31,12 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
   const [datum, setDatum] = useState(today);
   const [uhrzeitVon, setUhrzeitVon] = useState("");
   const [uhrzeitBis, setUhrzeitBis] = useState("");
-  const [mitarbeiter, setMitarbeiter] = useState("Thomas Berger");
+  const [ansprechpartnerId, setAnsprechpartnerId] = useState("");
   const [notizen, setNotizen] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Auto-calculate duration in minutes
+  const kundenAnsprechpartner = ansprechpartner.filter((a) => a.kunde_id === kundeId);
+
   const calcDauer = () => {
     if (!uhrzeitVon || !uhrzeitBis) return undefined;
     const [h1, m1] = uhrzeitVon.split(":").map(Number);
@@ -64,7 +50,7 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
     setDatum(today);
     setUhrzeitVon("");
     setUhrzeitBis("");
-    setMitarbeiter("Thomas Berger");
+    setAnsprechpartnerId("");
     setNotizen("");
   };
 
@@ -75,17 +61,19 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
     await new Promise((r) => setTimeout(r, 400));
 
     const kunde = mockKunden.find((k) => k.id === kundeId);
+    const selectedAP = kundenAnsprechpartner.find((a) => a.id === ansprechpartnerId);
     const id = `besuch-${Date.now()}`;
     const dauer = calcDauer();
     const newBesuch: Besuch = {
       id,
       kunde_id: kundeId,
       kunde: kunde || undefined,
-      mitarbeiter_name: mitarbeiter,
       durchgefuehrt_am: datum,
       uhrzeit_von: uhrzeitVon || undefined,
       uhrzeit_bis: uhrzeitBis || undefined,
       dauer_minuten: dauer,
+      ansprechpartner_id: ansprechpartnerId || undefined,
+      ansprechpartner_name: selectedAP?.name || undefined,
       notizen: notizen || undefined,
       status: "erledigt",
       created_at: new Date().toISOString(),
@@ -93,9 +81,7 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
 
     addBesuch(newBesuch);
     setSaving(false);
-
     resetForm();
-
     onClose();
     router.push(`/besuche/${id}`);
   };
@@ -115,18 +101,13 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
         <form onSubmit={handleSubmit} className="space-y-4 pt-1">
           {/* Kunde */}
           <div className="space-y-1.5">
-            <Label>
-              Kunde <span className="text-red-500">*</span>
-            </Label>
-            <Select value={kundeId} onValueChange={setKundeId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Kunde wählen" />
-              </SelectTrigger>
+            <Label>Kunde <span className="text-red-500">*</span></Label>
+            <Select value={kundeId} onValueChange={(v) => { setKundeId(v); setAnsprechpartnerId(""); }}>
+              <SelectTrigger><SelectValue placeholder="Kunde wählen" /></SelectTrigger>
               <SelectContent>
                 {mockKunden.map((k) => (
                   <SelectItem key={k.id} value={k.id}>
-                    {k.name1}
-                    {k.ort ? ` · ${k.ort}` : ""}
+                    {k.name1}{k.ort ? ` · ${k.ort}` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -135,9 +116,7 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
 
           {/* Datum */}
           <div className="space-y-1.5">
-            <Label htmlFor="datum">
-              Datum des Besuchs <span className="text-red-500">*</span>
-            </Label>
+            <Label htmlFor="datum">Datum des Besuchs <span className="text-red-500">*</span></Label>
             <Input
               id="datum"
               type="date"
@@ -151,21 +130,11 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="von">Uhrzeit von</Label>
-              <Input
-                id="von"
-                type="time"
-                value={uhrzeitVon}
-                onChange={(e) => setUhrzeitVon(e.target.value)}
-              />
+              <Input id="von" type="time" value={uhrzeitVon} onChange={(e) => setUhrzeitVon(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="bis">Uhrzeit bis</Label>
-              <Input
-                id="bis"
-                type="time"
-                value={uhrzeitBis}
-                onChange={(e) => setUhrzeitBis(e.target.value)}
-              />
+              <Input id="bis" type="time" value={uhrzeitBis} onChange={(e) => setUhrzeitBis(e.target.value)} />
             </div>
           </div>
 
@@ -173,25 +142,33 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
           {(() => {
             const dauer = calcDauer();
             return dauer && (
-              <p className="text-xs text-muted-foreground -mt-1">
-                Dauer: {dauer} Minuten
-              </p>
+              <p className="text-xs text-muted-foreground -mt-1">Dauer: {dauer} Minuten</p>
             );
           })()}
 
-          {/* Mitarbeiter */}
+          {/* Ansprechpartner */}
           <div className="space-y-1.5">
-            <Label>Mitarbeiter</Label>
-            <Select value={mitarbeiter} onValueChange={setMitarbeiter}>
+            <Label>Ansprechpartner</Label>
+            <Select
+              value={ansprechpartnerId}
+              onValueChange={setAnsprechpartnerId}
+              disabled={!kundeId}
+            >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder={!kundeId ? "Zuerst Kunde wählen" : "Ansprechpartner wählen"} />
               </SelectTrigger>
               <SelectContent>
-                {MITARBEITER.map((m) => (
-                  <SelectItem key={m.id} value={m.name}>
-                    {m.name}
+                {kundenAnsprechpartner.length === 0 ? (
+                  <SelectItem value="__none__" disabled>
+                    Kein Ansprechpartner hinterlegt
                   </SelectItem>
-                ))}
+                ) : (
+                  kundenAnsprechpartner.map((ap) => (
+                    <SelectItem key={ap.id} value={ap.id}>
+                      {ap.name}{ap.position ? ` · ${ap.position}` : ""}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -203,18 +180,13 @@ export function BerichtErfassenModal({ open, onClose }: Props) {
               id="notizen"
               value={notizen}
               onChange={(e) => setNotizen(e.target.value)}
-              placeholder="Gesprächspartner, Themen..."
+              placeholder="Gesprächsthemen..."
               className="w-full min-h-[70px] rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
             />
           </div>
 
           <DialogFooter className="pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={saving}
-            >
+            <Button type="button" variant="outline" onClick={onClose} disabled={saving}>
               Abbrechen
             </Button>
             <Button
