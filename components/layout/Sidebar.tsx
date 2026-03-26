@@ -65,9 +65,9 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 flex flex-col bg-white dark:bg-[#0f1117] border-r border-gray-200 dark:border-[#1e2130] shadow-sm dark:shadow-none">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 flex flex-col bg-background border-r border-border shadow-sm dark:shadow-none">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-200 dark:border-[#1e2130]">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
         <div className="flex items-center justify-center w-10 h-10 shrink-0">
           <Image
             src="/logo.png"
@@ -78,10 +78,10 @@ export function Sidebar() {
           />
         </div>
         <div>
-          <span className="text-gray-900 dark:text-white font-bold text-base leading-tight tracking-tight">
+          <span className="text-foreground font-bold text-base leading-tight tracking-tight">
             E.W. NEU GmbH
           </span>
-          <span className="block text-gray-400 dark:text-[#94a3b8] text-[10px] font-medium tracking-widest uppercase">
+          <span className="block text-muted-foreground text-[10px] font-medium tracking-widest uppercase">
             CRM System
           </span>
         </div>
@@ -90,7 +90,7 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 sidebar-scroll">
         <div className="mb-2 px-3">
-          <span className="text-[10px] font-semibold tracking-widest text-gray-400 dark:text-[#94a3b8]/60 uppercase">
+          <span className="text-[10px] font-semibold tracking-widest text-muted-foreground/60 uppercase">
             Navigation
           </span>
         </div>
@@ -108,7 +108,7 @@ export function Sidebar() {
                     "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 cursor-pointer",
                     isActive
                       ? "bg-[#E3000F]/10 text-[#E3000F] border border-[#E3000F]/20"
-                      : "text-gray-600 dark:text-[#94a3b8] hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#1a1d27]"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
                   <item.icon
@@ -116,7 +116,7 @@ export function Sidebar() {
                       "w-4 h-4 shrink-0 transition-colors",
                       isActive
                         ? "text-[#E3000F]"
-                        : "text-gray-400 dark:text-[#64748b] group-hover:text-gray-700 dark:group-hover:text-white"
+                        : "text-muted-foreground group-hover:text-foreground"
                     )}
                   />
                   <span className="flex-1">{item.label}</span>
@@ -130,7 +130,7 @@ export function Sidebar() {
         </ul>
 
         <div className="mt-6 mb-2 px-3">
-          <span className="text-[10px] font-semibold tracking-widest text-gray-400 dark:text-[#94a3b8]/60 uppercase">
+          <span className="text-[10px] font-semibold tracking-widest text-muted-foreground/60 uppercase">
             Konfiguration
           </span>
         </div>
@@ -142,7 +142,7 @@ export function Sidebar() {
                 "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 cursor-pointer",
                 pathname.startsWith("/einstellungen")
                   ? "bg-[#E3000F]/10 text-[#E3000F] border border-[#E3000F]/20"
-                  : "text-gray-600 dark:text-[#94a3b8] hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#1a1d27]"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
               <Settings
@@ -150,7 +150,7 @@ export function Sidebar() {
                   "w-4 h-4 shrink-0 transition-colors",
                   pathname.startsWith("/einstellungen")
                     ? "text-[#E3000F]"
-                    : "text-gray-400 dark:text-[#64748b] group-hover:text-gray-700 dark:group-hover:text-white"
+                    : "text-muted-foreground group-hover:text-foreground"
                 )}
               />
               <span className="flex-1">Einstellungen</span>
@@ -160,18 +160,18 @@ export function Sidebar() {
       </nav>
 
       {/* User Profile */}
-      <div className="border-t border-gray-200 dark:border-[#1e2130] px-4 py-4">
-        <div className="flex items-center gap-3 group cursor-pointer rounded-xl p-1.5 -mx-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1d27] transition-colors">
+      <div className="border-t border-border px-4 py-4">
+        <div className="flex items-center gap-3 group cursor-pointer rounded-xl p-1.5 -mx-1.5 hover:bg-muted transition-colors">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-[#E3000F]/20 text-[#E3000F] text-xs font-bold">
               TB
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+            <p className="text-sm font-medium text-foreground truncate">
               Thomas Berger
             </p>
-            <p className="text-xs text-gray-500 dark:text-[#94a3b8] truncate">
+            <p className="text-xs text-muted-foreground truncate">
               Vertriebsleiter
             </p>
           </div>
