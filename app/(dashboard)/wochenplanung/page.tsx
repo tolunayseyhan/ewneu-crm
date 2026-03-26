@@ -72,14 +72,20 @@ export default function WochenplanungPage() {
     });
 
     besuche.forEach((b) => {
-      if (!b.faellig_am) return;
+      const dateStr = b.status === "erledigt" ? b.durchgefuehrt_am : b.faellig_am;
+      if (!dateStr) return;
+      const hour = b.uhrzeit_von
+        ? parseInt(b.uhrzeit_von.split(":")[0], 10)
+        : 10;
       result.push({
         id: b.id,
         type: "besuch",
         label: b.kunde?.name1 || "Unbekannt",
-        subLabel: b.kunde?.ort,
-        date: new Date(b.faellig_am),
-        hour: 10,
+        subLabel: b.uhrzeit_von && b.uhrzeit_bis
+          ? `${b.uhrzeit_von}–${b.uhrzeit_bis}${b.bericht ? " 📝" : ""}`
+          : b.kunde?.ort,
+        date: new Date(dateStr),
+        hour,
         status: b.status,
       });
     });
