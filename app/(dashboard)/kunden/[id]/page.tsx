@@ -15,10 +15,11 @@ import {
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { HealthScore } from "@/components/kunden/HealthScore";
 import { KundenRevenueChart } from "@/components/kunden/KundenRevenueChart";
+import { KundenBesucheTab } from "@/components/kunden/KundenBesucheTab";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   mockKunden,
   mockAufgaben,
@@ -213,78 +214,93 @@ export default async function KundenDetailPage({
           </div>
         </div>
 
-        {/* Open Offers */}
-        {angebote.length > 0 && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="w-4 h-4" /> Angebote
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="divide-y divide-border">
-                {angebote.map((angebot) => (
-                  <div
-                    key={angebot.id}
-                    className="flex items-center gap-4 px-6 py-3.5 hover:bg-muted/30 transition-colors"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="font-mono text-xs text-muted-foreground">
-                          {angebot.nummer}
-                        </span>
-                        <StatusBadge status={angebot.status} />
-                      </div>
-                      <p className="text-sm font-medium">{angebot.artikel}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold">
-                        {formatCurrency(angebot.gesamtpreis || 0)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {angebot.erstellt_am && formatDate(angebot.erstellt_am)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Tabs: Besuche, Angebote, Aufgaben */}
+        <Tabs defaultValue="besuche">
+          <TabsList>
+            <TabsTrigger value="besuche">
+              <MapPin className="w-3.5 h-3.5 mr-1.5" /> Besuche
+            </TabsTrigger>
+            <TabsTrigger value="angebote">
+              <FileText className="w-3.5 h-3.5 mr-1.5" /> Angebote
+            </TabsTrigger>
+            <TabsTrigger value="aufgaben">
+              <CheckSquare className="w-3.5 h-3.5 mr-1.5" /> Aufgaben
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Tasks */}
-        {aufgaben.length > 0 && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <CheckSquare className="w-4 h-4" /> Aufgaben
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="divide-y divide-border">
-                {aufgaben.map((aufgabe) => (
-                  <div
-                    key={aufgabe.id}
-                    className="flex items-center gap-4 px-6 py-3.5 hover:bg-muted/30 transition-colors"
-                  >
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{aufgabe.titel}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {aufgabe.zugewiesener_name}
-                        {aufgabe.faellig_am &&
-                          ` · Fällig: ${formatDate(aufgabe.faellig_am)}`}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <StatusBadge status={aufgabe.prioritaet} />
-                      <StatusBadge status={aufgabe.status} />
-                    </div>
+          <TabsContent value="besuche">
+            <KundenBesucheTab kundeId={id} kundeName={kunde.name1} />
+          </TabsContent>
+
+          <TabsContent value="angebote">
+            {angebote.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4">Keine Angebote vorhanden.</p>
+            ) : (
+              <Card>
+                <CardContent className="p-0">
+                  <div className="divide-y divide-border">
+                    {angebote.map((angebot) => (
+                      <div
+                        key={angebot.id}
+                        className="flex items-center gap-4 px-6 py-3.5 hover:bg-muted/30 transition-colors"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="font-mono text-xs text-muted-foreground">
+                              {angebot.nummer}
+                            </span>
+                            <StatusBadge status={angebot.status} />
+                          </div>
+                          <p className="text-sm font-medium">{angebot.artikel}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold">
+                            {formatCurrency(angebot.gesamtpreis || 0)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {angebot.erstellt_am && formatDate(angebot.erstellt_am)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="aufgaben">
+            {aufgaben.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4">Keine Aufgaben vorhanden.</p>
+            ) : (
+              <Card>
+                <CardContent className="p-0">
+                  <div className="divide-y divide-border">
+                    {aufgaben.map((aufgabe) => (
+                      <div
+                        key={aufgabe.id}
+                        className="flex items-center gap-4 px-6 py-3.5 hover:bg-muted/30 transition-colors"
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{aufgabe.titel}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {aufgabe.zugewiesener_name}
+                            {aufgabe.faellig_am &&
+                              ` · Fällig: ${formatDate(aufgabe.faellig_am)}`}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={aufgabe.prioritaet} />
+                          <StatusBadge status={aufgabe.status} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
