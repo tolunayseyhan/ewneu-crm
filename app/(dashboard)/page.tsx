@@ -23,6 +23,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { NeueAufgabeModal } from "@/components/modals/NeueAufgabeModal";
 import { NeuerAnrufModal } from "@/components/modals/NeuerAnrufModal";
 import { NeuerBesuchModal } from "@/components/modals/NeuerBesuchModal";
+import { BerichtErfassenModal } from "@/components/modals/BerichtErfassenModal";
 import { mockAngebote, mockKunden } from "@/lib/mock-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useCRM } from "@/lib/crm-context";
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   const [showAufgabeModal, setShowAufgabeModal] = useState(false);
   const [showAnrufModal, setShowAnrufModal] = useState(false);
   const [showBesuchModal, setShowBesuchModal] = useState(false);
+  const [showBerichtModal, setShowBerichtModal] = useState(false);
 
   const offeneAufgaben = aufgaben.filter((a) => a.status !== "erledigt").length;
   const faelligeAnrufe = anrufe.filter((a) => a.status === "offen").length;
@@ -118,6 +120,14 @@ export default function DashboardPage() {
             onClick={() => setShowBesuchModal(true)}
           >
             <MapPin className="w-3.5 h-3.5" /> Besuch planen
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 dark:hover:bg-emerald-900/20 transition-colors"
+            onClick={() => setShowBerichtModal(true)}
+          >
+            <FileText className="w-3.5 h-3.5" /> Bericht erfassen
           </Button>
           <Link href="/kunden">
             <Button variant="outline" size="sm" className="gap-2 hover:bg-muted transition-colors">
@@ -228,6 +238,7 @@ export default function DashboardPage() {
       <NeueAufgabeModal open={showAufgabeModal} onClose={() => setShowAufgabeModal(false)} onAdd={addAufgabe} />
       <NeuerAnrufModal open={showAnrufModal} onClose={() => setShowAnrufModal(false)} onAdd={addAnruf} />
       <NeuerBesuchModal open={showBesuchModal} onClose={() => setShowBesuchModal(false)} onAdd={addBesuch} />
+      <BerichtErfassenModal open={showBerichtModal} onClose={() => setShowBerichtModal(false)} />
     </div>
   );
 }
