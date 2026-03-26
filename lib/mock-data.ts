@@ -1,4 +1,5 @@
 import type { Kunde, Aufgabe, Anruf, Besuch, Angebot, Aktivitaet, Ansprechpartner } from "./types";
+import { mockAngeboteReal } from "./angebote-import";
 
 export const mockKunden: Kunde[] = [
   {
@@ -425,99 +426,7 @@ export const mockBesuche: Besuch[] = [
   },
 ];
 
-export const mockAngebote: Angebot[] = [
-  {
-    id: "1",
-    nummer: "AN-2026-0051",
-    kunde_id: "10",
-    kunde: mockKunden[9],
-    artikel: "Laborausstattung Komplett-Set Pro",
-    menge: 2,
-    einzelpreis: 18500,
-    gesamtpreis: 37000,
-    status: "in_verhandlung",
-    erstellt_am: "2026-03-15",
-    created_at: "2026-03-15",
-  },
-  {
-    id: "2",
-    nummer: "AN-2026-0050",
-    kunde_id: "8",
-    kunde: mockKunden[7],
-    artikel: "CRM-Implementierung Enterprise",
-    menge: 1,
-    einzelpreis: 45000,
-    gesamtpreis: 45000,
-    status: "offen",
-    erstellt_am: "2026-03-18",
-    created_at: "2026-03-18",
-  },
-  {
-    id: "3",
-    nummer: "AN-2026-0049",
-    kunde_id: "6",
-    kunde: mockKunden[5],
-    artikel: "Schutzausrüstung Jahrespaket 2026",
-    menge: 500,
-    einzelpreis: 89,
-    gesamtpreis: 44500,
-    status: "angenommen",
-    erstellt_am: "2026-03-10",
-    created_at: "2026-03-10",
-  },
-  {
-    id: "4",
-    nummer: "AN-2026-0048",
-    kunde_id: "4",
-    kunde: mockKunden[3],
-    artikel: "Elektronik-Komponenten Rahmenvertrag",
-    menge: 1000,
-    einzelpreis: 245,
-    gesamtpreis: 245000,
-    status: "in_verhandlung",
-    erstellt_am: "2026-03-08",
-    created_at: "2026-03-08",
-  },
-  {
-    id: "5",
-    nummer: "AN-2026-0047",
-    kunde_id: "2",
-    kunde: mockKunden[1],
-    artikel: "Transportmanagementsystem Basic",
-    menge: 1,
-    einzelpreis: 12800,
-    gesamtpreis: 12800,
-    status: "abgelehnt",
-    erstellt_am: "2026-03-01",
-    created_at: "2026-03-01",
-  },
-  {
-    id: "6",
-    nummer: "AN-2026-0046",
-    kunde_id: "3",
-    kunde: mockKunden[2],
-    artikel: "Baustofflieferung Projekt Köln-Ehrenfeld",
-    menge: 800,
-    einzelpreis: 56,
-    gesamtpreis: 44800,
-    status: "angenommen",
-    erstellt_am: "2026-02-28",
-    created_at: "2026-02-28",
-  },
-  {
-    id: "7",
-    nummer: "AN-2026-0045",
-    kunde_id: "7",
-    kunde: mockKunden[6],
-    artikel: "Chemikalien-Lieferpaket Q2",
-    menge: 50,
-    einzelpreis: 1200,
-    gesamtpreis: 60000,
-    status: "offen",
-    erstellt_am: "2026-03-20",
-    created_at: "2026-03-20",
-  },
-];
+export const mockAngebote: Angebot[] = mockAngeboteReal;
 
 export const mockAktivitaeten: Aktivitaet[] = [
   {
