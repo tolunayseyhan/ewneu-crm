@@ -281,17 +281,15 @@ export default function WochenplanungPage() {
                         return (
                           <div
                             key={ev.id}
-                            className={`rounded-lg border-l-2 px-2 py-1.5 mb-1 text-left ${colors.bg} ${colors.border} ${ev.status === "erledigt" ? "opacity-50" : ""}`}
+                            className={`rounded-lg border-l-2 px-2 py-1.5 mb-1 text-left ${colors.bg} ${colors.border}`}
                           >
                             <div className={`flex items-center gap-1 ${colors.text}`}>
                               <Icon className="w-3 h-3 shrink-0" />
-                              <span className="text-[11px] font-semibold truncate leading-tight">{ev.label}</span>
+                              <span className={`text-[11px] font-semibold truncate leading-tight ${ev.status === "erledigt" ? "line-through" : ""}`}>{ev.label}</span>
+                              {ev.status === "erledigt" && <span className="ml-auto text-[9px] font-medium shrink-0">✓</span>}
                             </div>
                             {ev.subLabel && (
                               <p className={`text-[10px] truncate mt-0.5 ${colors.text} opacity-70`}>{ev.subLabel}</p>
-                            )}
-                            {ev.status === "erledigt" && (
-                              <span className="text-[9px] font-medium text-muted-foreground">✓ Erledigt</span>
                             )}
                           </div>
                         );
