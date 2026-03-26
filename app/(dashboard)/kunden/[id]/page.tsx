@@ -11,6 +11,7 @@ import {
   Plus,
   CheckSquare,
   FileText,
+  Users,
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { HealthScore } from "@/components/kunden/HealthScore";
 import { KundenRevenueChart } from "@/components/kunden/KundenRevenueChart";
 import { KundenBesucheTab } from "@/components/kunden/KundenBesucheTab";
+import { KundenAnsprechpartnerTab } from "@/components/kunden/KundenAnsprechpartnerTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   mockKunden,
@@ -220,6 +222,9 @@ export default async function KundenDetailPage({
             <TabsTrigger value="besuche">
               <MapPin className="w-3.5 h-3.5 mr-1.5" /> Besuche
             </TabsTrigger>
+            <TabsTrigger value="ansprechpartner">
+              <Users className="w-3.5 h-3.5 mr-1.5" /> Ansprechpartner
+            </TabsTrigger>
             <TabsTrigger value="angebote">
               <FileText className="w-3.5 h-3.5 mr-1.5" /> Angebote
             </TabsTrigger>
@@ -230,6 +235,10 @@ export default async function KundenDetailPage({
 
           <TabsContent value="besuche">
             <KundenBesucheTab kundeId={id} kundeName={kunde.name1} />
+          </TabsContent>
+
+          <TabsContent value="ansprechpartner">
+            <KundenAnsprechpartnerTab kundeId={id} />
           </TabsContent>
 
           <TabsContent value="angebote">
