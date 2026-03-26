@@ -4,14 +4,16 @@ import { useState } from "react";
 import { Phone, Check, Plus, Clock } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { NeuerAnrufModal } from "@/components/modals/NeuerAnrufModal";
 import { mockAnrufe } from "@/lib/mock-data";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import type { Anruf } from "@/lib/types";
 
 export default function AnrufePage() {
-  const [anrufe, setAnrufe] = useState(mockAnrufe);
+  const [anrufe, setAnrufe] = useState<Anruf[]>(mockAnrufe);
+  const [showModal, setShowModal] = useState(false);
 
   const markAsDone = (id: string) => {
     setAnrufe((prev) =>
@@ -23,15 +25,16 @@ export default function AnrufePage() {
     );
   };
 
+  const handleAdd = (anruf: Anruf) => {
+    setAnrufe((prev) => [anruf, ...prev]);
+  };
+
   const offene = anrufe.filter((a) => a.status === "offen");
   const erledigte = anrufe.filter((a) => a.status === "erledigt");
 
   return (
     <div>
-      <Header
-        title="Anrufe"
-        subtitle={`${offene.length} fällige Anrufe`}
-      />
+      <Header title="Anrufe" subtitle={`${offene.length} fällige Anrufe`} />
 
       <div className="p-6 space-y-6">
         {/* Quick Stats */}
@@ -61,7 +64,7 @@ export default function AnrufePage() {
 
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">Anrufliste</h2>
-          <Button size="sm" className="gap-2">
+          <Button size="sm" className="gap-2" onClick={() => setShowModal(true)}>
             <Plus className="w-3.5 h-3.5" /> Anruf hinzufügen
           </Button>
         </div>
@@ -71,24 +74,12 @@ export default function AnrufePage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Fällig am
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Kunde
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden md:table-cell">
-                  Telefon
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden lg:table-cell">
-                  Mitarbeiter
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden xl:table-cell">
-                  Notizen
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Status
-                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Fällig am</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kunde</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden md:table-cell">Telefon</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden lg:table-cell">Mitarbeiter</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden xl:table-cell">Notizen</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Status</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -99,15 +90,10 @@ export default function AnrufePage() {
                   new Date(anruf.faellig_am) < new Date() &&
                   anruf.status === "offen";
                 return (
-                  <tr
-                    key={anruf.id}
-                    className="hover:bg-muted/30 transition-colors group"
-                  >
+                  <tr key={anruf.id} className="hover:bg-muted/30 transition-colors group">
                     <td className="px-4 py-3.5">
                       {anruf.faellig_am ? (
-                        <span
-                          className={`text-sm font-medium ${isOverdue ? "text-red-500" : "text-foreground"}`}
-                        >
+                        <span className={`text-sm font-medium ${isOverdue ? "text-red-500" : "text-foreground"}`}>
                           {formatDate(anruf.faellig_am)}
                         </span>
                       ) : (
@@ -116,16 +102,9 @@ export default function AnrufePage() {
                     </td>
                     <td className="px-4 py-3.5">
                       {anruf.kunde ? (
-                        <Link
-                          href={`/kunden/${anruf.kunde_id}`}
-                          className="hover:text-[#E3000F] transition-colors"
-                        >
-                          <p className="font-medium text-foreground">
-                            {anruf.kunde.name1}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {anruf.kunde.ort}
-                          </p>
+                        <Link href={`/kunden/${anruf.kunde_id}`} className="hover:text-[#E3000F] transition-colors">
+                          <p className="font-medium text-foreground">{anruf.kunde.name1}</p>
+                          <p className="text-xs text-muted-foreground">{anruf.kunde.ort}</p>
                         </Link>
                       ) : (
                         <span className="text-muted-foreground">–</span>
@@ -133,10 +112,7 @@ export default function AnrufePage() {
                     </td>
                     <td className="px-4 py-3.5 hidden md:table-cell">
                       {anruf.kunde?.telefon ? (
-                        <a
-                          href={`tel:${anruf.kunde.telefon}`}
-                          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#E3000F] transition-colors"
-                        >
+                        <a href={`tel:${anruf.kunde.telefon}`} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#E3000F] transition-colors">
                           <Phone className="w-3.5 h-3.5" />
                           {anruf.kunde.telefon}
                         </a>
@@ -145,18 +121,12 @@ export default function AnrufePage() {
                       )}
                     </td>
                     <td className="px-4 py-3.5 hidden lg:table-cell">
-                      <span className="text-xs text-muted-foreground">
-                        {anruf.mitarbeiter_name || "–"}
-                      </span>
+                      <span className="text-xs text-muted-foreground">{anruf.mitarbeiter_name || "–"}</span>
                     </td>
                     <td className="px-4 py-3.5 hidden xl:table-cell">
-                      <span className="text-xs text-muted-foreground line-clamp-1 max-w-48">
-                        {anruf.notizen || "–"}
-                      </span>
+                      <span className="text-xs text-muted-foreground line-clamp-1 max-w-48">{anruf.notizen || "–"}</span>
                     </td>
-                    <td className="px-4 py-3.5">
-                      <StatusBadge status={anruf.status} />
-                    </td>
+                    <td className="px-4 py-3.5"><StatusBadge status={anruf.status} /></td>
                     <td className="px-4 py-3.5">
                       {anruf.status === "offen" && (
                         <Button
@@ -169,9 +139,7 @@ export default function AnrufePage() {
                         </Button>
                       )}
                       {anruf.status === "erledigt" && anruf.durchgefuehrt_am && (
-                        <span className="text-xs text-muted-foreground">
-                          {formatDate(anruf.durchgefuehrt_am)}
-                        </span>
+                        <span className="text-xs text-muted-foreground">{formatDate(anruf.durchgefuehrt_am)}</span>
                       )}
                     </td>
                   </tr>
@@ -181,6 +149,12 @@ export default function AnrufePage() {
           </table>
         </div>
       </div>
+
+      <NeuerAnrufModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onAdd={handleAdd}
+      />
     </div>
   );
 }

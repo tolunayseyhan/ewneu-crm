@@ -12,13 +12,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { NeuerBesuchModal } from "@/components/modals/NeuerBesuchModal";
 import { mockBesuche } from "@/lib/mock-data";
-import { formatDate, formatDateTime } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import type { Besuch } from "@/lib/types";
 
 export default function BesuchePage() {
-  const [besuche, setBesuche] = useState(mockBesuche);
+  const [besuche, setBesuche] = useState<Besuch[]>(mockBesuche);
   const [mitarbeiterFilter, setMitarbeiterFilter] = useState("alle");
+  const [showModal, setShowModal] = useState(false);
 
   const markAsDone = (id: string) => {
     setBesuche((prev) =>
@@ -28,6 +31,10 @@ export default function BesuchePage() {
           : b
       )
     );
+  };
+
+  const handleAdd = (besuch: Besuch) => {
+    setBesuche((prev) => [besuch, ...prev]);
   };
 
   const mitarbeiter = ["alle", ...Array.from(new Set(besuche.map((b) => b.mitarbeiter_name).filter(Boolean)))];
@@ -42,10 +49,7 @@ export default function BesuchePage() {
 
   return (
     <div>
-      <Header
-        title="Besuche"
-        subtitle={`${offene.length} geplante Besuche`}
-      />
+      <Header title="Besuche" subtitle={`${offene.length} geplante Besuche`} />
 
       <div className="p-6 space-y-6">
         {/* Quick Stats */}
@@ -88,7 +92,7 @@ export default function BesuchePage() {
             </SelectContent>
           </Select>
 
-          <Button size="sm" className="gap-2">
+          <Button size="sm" className="gap-2" onClick={() => setShowModal(true)}>
             <Plus className="w-3.5 h-3.5" /> Besuch planen
           </Button>
         </div>
@@ -98,24 +102,12 @@ export default function BesuchePage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Fällig am
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Kunde
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden md:table-cell">
-                  Mitarbeiter
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden xl:table-cell">
-                  Notizen
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden lg:table-cell">
-                  Dauer
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Status
-                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Fällig am</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kunde</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden md:table-cell">Mitarbeiter</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden xl:table-cell">Notizen</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden lg:table-cell">Dauer</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Status</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -126,15 +118,10 @@ export default function BesuchePage() {
                   new Date(besuch.faellig_am) < new Date() &&
                   besuch.status === "offen";
                 return (
-                  <tr
-                    key={besuch.id}
-                    className="hover:bg-muted/30 transition-colors group"
-                  >
+                  <tr key={besuch.id} className="hover:bg-muted/30 transition-colors group">
                     <td className="px-4 py-3.5">
                       {besuch.faellig_am ? (
-                        <span
-                          className={`text-sm font-medium ${isOverdue ? "text-red-500" : "text-foreground"}`}
-                        >
+                        <span className={`text-sm font-medium ${isOverdue ? "text-red-500" : "text-foreground"}`}>
                           {formatDate(besuch.faellig_am)}
                         </span>
                       ) : (
@@ -143,16 +130,10 @@ export default function BesuchePage() {
                     </td>
                     <td className="px-4 py-3.5">
                       {besuch.kunde ? (
-                        <Link
-                          href={`/kunden/${besuch.kunde_id}`}
-                          className="hover:text-[#E3000F] transition-colors"
-                        >
-                          <p className="font-medium text-foreground">
-                            {besuch.kunde.name1}
-                          </p>
+                        <Link href={`/kunden/${besuch.kunde_id}`} className="hover:text-[#E3000F] transition-colors">
+                          <p className="font-medium text-foreground">{besuch.kunde.name1}</p>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                            <MapPin className="w-3 h-3" />
-                            {besuch.kunde.ort}
+                            <MapPin className="w-3 h-3" />{besuch.kunde.ort}
                           </div>
                         </Link>
                       ) : (
@@ -160,25 +141,17 @@ export default function BesuchePage() {
                       )}
                     </td>
                     <td className="px-4 py-3.5 hidden md:table-cell">
-                      <span className="text-xs text-muted-foreground">
-                        {besuch.mitarbeiter_name || "–"}
-                      </span>
+                      <span className="text-xs text-muted-foreground">{besuch.mitarbeiter_name || "–"}</span>
                     </td>
                     <td className="px-4 py-3.5 hidden xl:table-cell">
-                      <span className="text-xs text-muted-foreground line-clamp-1 max-w-48">
-                        {besuch.notizen || "–"}
-                      </span>
+                      <span className="text-xs text-muted-foreground line-clamp-1 max-w-48">{besuch.notizen || "–"}</span>
                     </td>
                     <td className="px-4 py-3.5 hidden lg:table-cell">
                       <span className="text-xs text-muted-foreground">
-                        {besuch.dauer_minuten
-                          ? `${besuch.dauer_minuten} Min.`
-                          : "–"}
+                        {besuch.dauer_minuten ? `${besuch.dauer_minuten} Min.` : "–"}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5">
-                      <StatusBadge status={besuch.status} />
-                    </td>
+                    <td className="px-4 py-3.5"><StatusBadge status={besuch.status} /></td>
                     <td className="px-4 py-3.5">
                       {besuch.status === "offen" && (
                         <Button
@@ -191,9 +164,7 @@ export default function BesuchePage() {
                         </Button>
                       )}
                       {besuch.status === "erledigt" && besuch.durchgefuehrt_am && (
-                        <span className="text-xs text-muted-foreground">
-                          {formatDate(besuch.durchgefuehrt_am)}
-                        </span>
+                        <span className="text-xs text-muted-foreground">{formatDate(besuch.durchgefuehrt_am)}</span>
                       )}
                     </td>
                   </tr>
@@ -203,6 +174,12 @@ export default function BesuchePage() {
           </table>
         </div>
       </div>
+
+      <NeuerBesuchModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onAdd={handleAdd}
+      />
     </div>
   );
 }

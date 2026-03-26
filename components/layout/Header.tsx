@@ -5,6 +5,7 @@ import { Bell, Search, Sun, Moon, Command } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommandPalette } from "./CommandPalette";
+import { NotificationPanel } from "./NotificationPanel";
 
 interface HeaderProps {
   title: string;
@@ -14,6 +15,7 @@ interface HeaderProps {
 export function Header({ title, subtitle }: HeaderProps) {
   const [showCommand, setShowCommand] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const toggleDark = () => {
     setIsDark(!isDark);
@@ -36,7 +38,7 @@ export function Header({ title, subtitle }: HeaderProps) {
           {/* Search trigger */}
           <button
             onClick={() => setShowCommand(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-muted/50 text-muted-foreground text-sm hover:bg-muted transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-muted/50 text-muted-foreground text-sm hover:bg-muted transition-colors cursor-pointer"
           >
             <Search className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Suchen...</span>
@@ -46,7 +48,13 @@ export function Header({ title, subtitle }: HeaderProps) {
           </button>
 
           {/* Dark mode toggle */}
-          <Button variant="ghost" size="icon" onClick={toggleDark}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleDark}
+            className="hover:bg-muted transition-colors"
+            title={isDark ? "Light Mode" : "Dark Mode"}
+          >
             {isDark ? (
               <Sun className="w-4 h-4" />
             ) : (
@@ -55,15 +63,28 @@ export function Header({ title, subtitle }: HeaderProps) {
           </Button>
 
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="w-4 h-4" />
-            <Badge
-              variant="default"
-              className="absolute -top-0.5 -right-0.5 h-4 w-4 p-0 text-[9px] flex items-center justify-center rounded-full bg-[#E3000F] text-white border-0"
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative hover:bg-muted transition-colors"
+              onClick={() => setShowNotifications((v) => !v)}
+              title="Benachrichtigungen"
             >
-              3
-            </Badge>
-          </Button>
+              <Bell className="w-4 h-4" />
+              <Badge
+                variant="default"
+                className="absolute -top-0.5 -right-0.5 h-4 w-4 p-0 text-[9px] flex items-center justify-center rounded-full bg-[#E3000F] text-white border-0 pointer-events-none"
+              >
+                3
+              </Badge>
+            </Button>
+
+            <NotificationPanel
+              open={showNotifications}
+              onClose={() => setShowNotifications(false)}
+            />
+          </div>
         </div>
       </header>
 

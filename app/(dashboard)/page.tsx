@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   CheckSquare,
   Phone,
@@ -16,12 +19,19 @@ import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { WeeklyChart } from "@/components/dashboard/WeeklyChart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { NeueAufgabeModal } from "@/components/modals/NeueAufgabeModal";
+import { NeuerAnrufModal } from "@/components/modals/NeuerAnrufModal";
+import { NeuerBesuchModal } from "@/components/modals/NeuerBesuchModal";
 import { mockAufgaben, mockAnrufe, mockBesuche, mockAngebote, mockKunden } from "@/lib/mock-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import type { Aufgabe, Anruf, Besuch } from "@/lib/types";
 
 export default function DashboardPage() {
+  const [showAufgabeModal, setShowAufgabeModal] = useState(false);
+  const [showAnrufModal, setShowAnrufModal] = useState(false);
+  const [showBesuchModal, setShowBesuchModal] = useState(false);
+
   const offeneAufgaben = mockAufgaben.filter((a) => a.status !== "erledigt").length;
   const faelligeAnrufe = mockAnrufe.filter((a) => a.status === "offen").length;
   const faelligeBesuche = mockBesuche.filter((b) => b.status === "offen").length;
@@ -36,7 +46,6 @@ export default function DashboardPage() {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 3);
 
-  // Streak: count customers contacted this week
   const weekStart = new Date();
   weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
   const wochenKontakte = mockKunden.filter(
@@ -62,12 +71,10 @@ export default function DashboardPage() {
               <span className="text-[#E3000F]">{wochenKontakte} Kunden</span>{" "}
               kontaktiert
             </p>
-            <p className="text-xs text-muted-foreground">
-              Weiter so – bleib am Ball!
-            </p>
+            <p className="text-xs text-muted-foreground">Weiter so – bleib am Ball!</p>
           </div>
           <Link href="/kunden">
-            <Button variant="outline" size="sm" className="text-xs">
+            <Button variant="outline" size="sm" className="text-xs hover:bg-muted transition-colors">
               Kunden ansehen <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </Button>
           </Link>
@@ -75,38 +82,10 @@ export default function DashboardPage() {
 
         {/* Stat Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            title="Offene Aufgaben"
-            value={offeneAufgaben}
-            icon={CheckSquare}
-            trend={-12}
-            trendLabel="vs. letzte Woche"
-            color="orange"
-          />
-          <StatCard
-            title="Fällige Anrufe"
-            value={faelligeAnrufe}
-            icon={Phone}
-            trend={5}
-            trendLabel="vs. gestern"
-            color="blue"
-          />
-          <StatCard
-            title="Fällige Besuche"
-            value={faelligeBesuche}
-            icon={MapPin}
-            trend={-8}
-            trendLabel="vs. letzte Woche"
-            color="green"
-          />
-          <StatCard
-            title="Gesamtumsatz"
-            value={formatCurrency(gesamtumsatz)}
-            icon={TrendingUp}
-            trend={14}
-            trendLabel="vs. Vorjahr"
-            color="red"
-          />
+          <StatCard title="Offene Aufgaben" value={offeneAufgaben} icon={CheckSquare} trend={-12} trendLabel="vs. letzte Woche" color="orange" />
+          <StatCard title="Fällige Anrufe" value={faelligeAnrufe} icon={Phone} trend={5} trendLabel="vs. gestern" color="blue" />
+          <StatCard title="Fällige Besuche" value={faelligeBesuche} icon={MapPin} trend={-8} trendLabel="vs. letzte Woche" color="green" />
+          <StatCard title="Gesamtumsatz" value={formatCurrency(gesamtumsatz)} icon={TrendingUp} trend={14} trendLabel="vs. Vorjahr" color="red" />
         </div>
 
         {/* Quick Actions */}
@@ -114,28 +93,37 @@ export default function DashboardPage() {
           <span className="text-sm font-medium text-muted-foreground self-center mr-2">
             Schnellzugriff:
           </span>
-          <Link href="/aufgaben">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Plus className="w-3.5 h-3.5" /> Aufgabe
-            </Button>
-          </Link>
-          <Link href="/anrufe">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Phone className="w-3.5 h-3.5" /> Anruf erfassen
-            </Button>
-          </Link>
-          <Link href="/besuche">
-            <Button variant="outline" size="sm" className="gap-2">
-              <MapPin className="w-3.5 h-3.5" /> Besuch planen
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-700 dark:hover:bg-orange-900/20 transition-colors"
+            onClick={() => setShowAufgabeModal(true)}
+          >
+            <Plus className="w-3.5 h-3.5" /> Aufgabe
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 dark:hover:bg-blue-900/20 transition-colors"
+            onClick={() => setShowAnrufModal(true)}
+          >
+            <Phone className="w-3.5 h-3.5" /> Anruf erfassen
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 hover:bg-green-50 hover:border-green-300 hover:text-green-700 dark:hover:bg-green-900/20 transition-colors"
+            onClick={() => setShowBesuchModal(true)}
+          >
+            <MapPin className="w-3.5 h-3.5" /> Besuch planen
+          </Button>
           <Link href="/kunden">
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2 hover:bg-muted transition-colors">
               <Users className="w-3.5 h-3.5" /> Kunden
             </Button>
           </Link>
           <Link href="/angebote">
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2 hover:bg-muted transition-colors">
               <FileText className="w-3.5 h-3.5" /> Angebote
             </Button>
           </Link>
@@ -156,38 +144,37 @@ export default function DashboardPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">Anstehende Aufgaben</CardTitle>
-                  <Link href="/aufgaben">
-                    <Button variant="ghost" size="sm" className="text-xs h-7">
-                      Alle <ArrowRight className="w-3 h-3 ml-1" />
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs h-7 gap-1 text-[#E3000F] hover:text-[#cc000e] hover:bg-[#E3000F]/10"
+                      onClick={() => setShowAufgabeModal(true)}
+                    >
+                      <Plus className="w-3 h-3" />
                     </Button>
-                  </Link>
+                    <Link href="/aufgaben">
+                      <Button variant="ghost" size="sm" className="text-xs h-7">
+                        Alle <ArrowRight className="w-3 h-3 ml-1" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-border">
                   {upcomingTasks.map((task) => {
-                    const isOverdue =
-                      task.faellig_am &&
-                      new Date(task.faellig_am) < new Date();
+                    const isOverdue = task.faellig_am && new Date(task.faellig_am) < new Date();
                     return (
-                      <div
-                        key={task.id}
-                        className="px-6 py-3 hover:bg-muted/30 transition-colors"
-                      >
+                      <div key={task.id} className="px-6 py-3 hover:bg-muted/30 transition-colors">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm font-medium text-foreground leading-snug">
-                            {task.titel}
-                          </p>
+                          <p className="text-sm font-medium text-foreground leading-snug">{task.titel}</p>
                           <StatusBadge status={task.prioritaet} />
                         </div>
                         <div className="flex items-center justify-between mt-1">
-                          <span className="text-xs text-muted-foreground">
-                            {task.kunde?.name1}
-                          </span>
+                          <span className="text-xs text-muted-foreground">{task.kunde?.name1}</span>
                           {task.faellig_am && (
-                            <span
-                              className={`text-xs ${isOverdue ? "text-red-500 font-medium" : "text-muted-foreground"}`}
-                            >
+                            <span className={`text-xs ${isOverdue ? "text-red-500 font-medium" : "text-muted-foreground"}`}>
                               {formatDate(task.faellig_am)}
                             </span>
                           )}
@@ -214,26 +201,15 @@ export default function DashboardPage() {
               <CardContent className="p-0">
                 <div className="divide-y divide-border">
                   {recentOffers.map((offer) => (
-                    <div
-                      key={offer.id}
-                      className="px-6 py-3 hover:bg-muted/30 transition-colors"
-                    >
+                    <div key={offer.id} className="px-6 py-3 hover:bg-muted/30 transition-colors">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-mono text-muted-foreground">
-                            {offer.nummer}
-                          </p>
-                          <p className="text-sm font-medium text-foreground truncate">
-                            {offer.kunde?.name1}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {offer.artikel}
-                          </p>
+                          <p className="text-xs font-mono text-muted-foreground">{offer.nummer}</p>
+                          <p className="text-sm font-medium text-foreground truncate">{offer.kunde?.name1}</p>
+                          <p className="text-xs text-muted-foreground truncate">{offer.artikel}</p>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="text-sm font-bold text-foreground">
-                            {formatCurrency(offer.gesamtpreis || 0)}
-                          </p>
+                          <p className="text-sm font-bold text-foreground">{formatCurrency(offer.gesamtpreis || 0)}</p>
                           <StatusBadge status={offer.status} />
                         </div>
                       </div>
@@ -245,6 +221,11 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <NeueAufgabeModal open={showAufgabeModal} onClose={() => setShowAufgabeModal(false)} onAdd={(_a: Aufgabe) => {}} />
+      <NeuerAnrufModal open={showAnrufModal} onClose={() => setShowAnrufModal(false)} onAdd={(_a: Anruf) => {}} />
+      <NeuerBesuchModal open={showBesuchModal} onClose={() => setShowBesuchModal(false)} onAdd={(_b: Besuch) => {}} />
     </div>
   );
 }
