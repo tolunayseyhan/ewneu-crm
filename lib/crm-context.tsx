@@ -1,13 +1,14 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
-import { mockAufgaben, mockAnrufe, mockBesuche } from "./mock-data";
-import type { Aufgabe, Anruf, Besuch, Anhang } from "./types";
+import { mockAufgaben, mockAnrufe, mockBesuche, mockAnsprechpartner } from "./mock-data";
+import type { Aufgabe, Anruf, Besuch, Anhang, Ansprechpartner } from "./types";
 
 interface CRMContextType {
   aufgaben: Aufgabe[];
   anrufe: Anruf[];
   besuche: Besuch[];
+  ansprechpartner: Ansprechpartner[];
   addAufgabe: (a: Aufgabe) => void;
   addAnruf: (a: Anruf) => void;
   addBesuch: (b: Besuch) => void;
@@ -17,6 +18,9 @@ interface CRMContextType {
   updateBesuch: (id: string, updates: Partial<Besuch>) => void;
   addAnhangToBesuch: (besuchId: string, anhang: Anhang) => void;
   removeAnhangFromBesuch: (besuchId: string, anhangId: string) => void;
+  addAnsprechpartner: (a: Ansprechpartner) => void;
+  updateAnsprechpartner: (id: string, updates: Partial<Ansprechpartner>) => void;
+  deleteAnsprechpartner: (id: string) => void;
 }
 
 const CRMContext = createContext<CRMContextType | null>(null);
@@ -25,6 +29,7 @@ export function CRMProvider({ children }: { children: ReactNode }) {
   const [aufgaben, setAufgaben] = useState<Aufgabe[]>(mockAufgaben);
   const [anrufe, setAnrufe] = useState<Anruf[]>(mockAnrufe);
   const [besuche, setBesuche] = useState<Besuch[]>(mockBesuche);
+  const [ansprechpartner, setAnsprechpartner] = useState<Ansprechpartner[]>(mockAnsprechpartner);
 
   const addAufgabe = (a: Aufgabe) => setAufgaben((prev) => [a, ...prev]);
   const addAnruf = (a: Anruf) => setAnrufe((prev) => [a, ...prev]);
@@ -80,9 +85,26 @@ export function CRMProvider({ children }: { children: ReactNode }) {
       )
     );
 
+  const addAnsprechpartner = (a: Ansprechpartner) =>
+    setAnsprechpartner((prev) => [...prev, a]);
+
+  const updateAnsprechpartner = (id: string, updates: Partial<Ansprechpartner>) =>
+    setAnsprechpartner((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, ...updates } : a))
+    );
+
+  const deleteAnsprechpartner = (id: string) =>
+    setAnsprechpartner((prev) => prev.filter((a) => a.id !== id));
+
   return (
     <CRMContext.Provider
-      value={{ aufgaben, anrufe, besuche, addAufgabe, addAnruf, addBesuch, markAnrufDone, markBesuchDone, markAufgabeDone, updateBesuch, addAnhangToBesuch, removeAnhangFromBesuch }}
+      value={{
+        aufgaben, anrufe, besuche, ansprechpartner,
+        addAufgabe, addAnruf, addBesuch,
+        markAnrufDone, markBesuchDone, markAufgabeDone,
+        updateBesuch, addAnhangToBesuch, removeAnhangFromBesuch,
+        addAnsprechpartner, updateAnsprechpartner, deleteAnsprechpartner,
+      }}
     >
       {children}
     </CRMContext.Provider>
