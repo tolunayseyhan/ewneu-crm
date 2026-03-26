@@ -75,7 +75,7 @@ export default function WochenplanungPage() {
       const dateStr = b.status === "erledigt" ? b.durchgefuehrt_am : b.faellig_am;
       if (!dateStr) return;
       const hour = b.uhrzeit_von
-        ? parseInt(b.uhrzeit_von.split(":")[0], 10)
+        ? (parseInt(b.uhrzeit_von.split(":")[0], 10) || 10)
         : 10;
       result.push({
         id: b.id,

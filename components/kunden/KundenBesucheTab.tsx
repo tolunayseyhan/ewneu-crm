@@ -40,7 +40,7 @@ export function KundenBesucheTab({ kundeId, kundeName }: Props) {
       {kundenBesuche.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border p-8 text-center">
           <MapPin className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">Noch keine Besuche erfasst</p>
+          <p className="text-sm text-muted-foreground">Noch keine Besuche bei {kundeName} erfasst</p>
           <Button
             size="sm"
             variant="outline"
@@ -84,8 +84,10 @@ export function KundenBesucheTab({ kundeId, kundeName }: Props) {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
                         <StatusBadge status={besuch.status} />
-                        {besuch.bericht && <span className="text-xs" title="Bericht vorhanden">📝</span>}
-                        {(besuch.anhänge?.length ?? 0) > 0 && <span className="text-xs" title="Anhänge vorhanden">📎</span>}
+                        {besuch.bericht && <span className="text-xs" title="Bericht vorhanden" aria-label="Bericht vorhanden" role="img">📝</span>}
+                        {(besuch.anhänge?.length ?? 0) > 0 && (
+                          <span className="text-xs" title="Anhänge vorhanden" aria-label="Anhänge vorhanden" role="img">📎</span>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
