@@ -4,49 +4,7 @@ import { CheckSquare, Phone, MapPin, FileText, X, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-const NOTIFICATIONS = [
-  {
-    id: "1",
-    typ: "aufgabe" as const,
-    titel: "Aufgabe fällig",
-    text: "Angebot nachfassen – Müller & Söhne GmbH",
-    zeit: "vor 10 Min.",
-    gelesen: false,
-  },
-  {
-    id: "2",
-    typ: "anruf" as const,
-    titel: "Anruf überfällig",
-    text: "Fischer Elektronik KG – seit 2 Tagen offen",
-    zeit: "vor 2 Std.",
-    gelesen: false,
-  },
-  {
-    id: "3",
-    typ: "angebot" as const,
-    titel: "Neues Angebot",
-    text: "Schneider Logistik AG – ANG-2026-0042",
-    zeit: "gestern",
-    gelesen: false,
-  },
-  {
-    id: "4",
-    typ: "besuch" as const,
-    titel: "Besuch morgen",
-    text: "Weber Bau GmbH – 10:00 Uhr geplant",
-    zeit: "gestern",
-    gelesen: true,
-  },
-  {
-    id: "5",
-    typ: "aufgabe" as const,
-    titel: "Aufgabe erledigt",
-    text: "Preisliste aktualisieren – Sandra Koch",
-    zeit: "vor 2 Tagen",
-    gelesen: true,
-  },
-];
+import type { Notification } from "./Header";
 
 const ICONS = {
   aufgabe: { icon: CheckSquare, bg: "bg-orange-100 dark:bg-orange-900/30", color: "text-orange-600" },
@@ -58,20 +16,21 @@ const ICONS = {
 interface Props {
   open: boolean;
   onClose: () => void;
+  notifications: Notification[];
+  onDelete: (id: string) => void;
+  onMarkAllRead: () => void;
+  onDeleteAll: () => void;
 }
 
-export function NotificationPanel({ open, onClose }: Props) {
+export function NotificationPanel({ open, onClose, notifications, onDelete, onMarkAllRead, onDeleteAll }: Props) {
   if (!open) return null;
 
-  const ungelesen = NOTIFICATIONS.filter((n) => !n.gelesen).length;
+  const ungelesen = notifications.filter((n) => !n.gelesen).length;
 
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-40"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 z-40" onClick={onClose} />
 
       {/* Panel */}
       <div className="absolute right-0 top-full mt-2 z-50 w-80 rounded-2xl border border-border bg-background shadow-2xl shadow-black/10 overflow-hidden">
@@ -91,45 +50,70 @@ export function NotificationPanel({ open, onClose }: Props) {
           </Button>
         </div>
 
-        {/* Notifications */}
+        {/* Notifications list or empty state */}
         <div className="divide-y divide-border max-h-80 overflow-y-auto">
-          {NOTIFICATIONS.map((notif) => {
-            const meta = ICONS[notif.typ];
-            const Icon = meta.icon;
-            return (
-              <div
-                key={notif.id}
-                className={cn(
-                  "flex items-start gap-3 px-4 py-3 hover:bg-muted/40 transition-colors cursor-pointer",
-                  !notif.gelesen && "bg-[#E3000F]/3"
-                )}
-              >
-                <div className={cn("flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5", meta.bg)}>
-                  <Icon className={cn("w-3.5 h-3.5", meta.color)} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className={cn("text-xs font-semibold", !notif.gelesen ? "text-foreground" : "text-muted-foreground")}>
-                      {notif.titel}
-                    </p>
-                    {!notif.gelesen && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#E3000F] shrink-0" />
-                    )}
+          {notifications.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 gap-2">
+              <Bell className="w-8 h-8 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">Keine Benachrichtigungen</p>
+            </div>
+          ) : (
+            notifications.map((notif) => {
+              const meta = ICONS[notif.typ];
+              const Icon = meta.icon;
+              return (
+                <div
+                  key={notif.id}
+                  className={cn(
+                    "group flex items-start gap-3 px-4 py-3 hover:bg-muted/40 transition-colors",
+                    !notif.gelesen && "bg-[#E3000F]/3"
+                  )}
+                >
+                  <div className={cn("flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5", meta.bg)}>
+                    <Icon className={cn("w-3.5 h-3.5", meta.color)} />
                   </div>
-                  <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{notif.text}</p>
-                  <p className="text-[10px] text-muted-foreground/60 mt-1">{notif.zeit}</p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={cn("text-xs font-semibold", !notif.gelesen ? "text-foreground" : "text-muted-foreground")}>
+                        {notif.titel}
+                      </p>
+                      {!notif.gelesen && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#E3000F] shrink-0" />
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{notif.text}</p>
+                    <p className="text-[10px] text-muted-foreground/60 mt-1">{notif.zeit}</p>
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onDelete(notif.id); }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5 p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground"
+                    title="Löschen"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
-        {/* Footer */}
-        <div className="px-4 py-2.5 border-t border-border bg-muted/30">
-          <button className="text-xs text-[#E3000F] hover:text-[#cc000e] font-medium transition-colors w-full text-center">
-            Alle als gelesen markieren
-          </button>
-        </div>
+        {/* Footer — only show when there are notifications */}
+        {notifications.length > 0 && (
+          <div className="px-4 py-2.5 border-t border-border bg-muted/30 flex items-center justify-between gap-2">
+            <button
+              onClick={onMarkAllRead}
+              className="text-xs text-[#E3000F] hover:text-[#cc000e] font-medium transition-colors"
+            >
+              Alle gelesen
+            </button>
+            <button
+              onClick={onDeleteAll}
+              className="text-xs text-muted-foreground hover:text-foreground font-medium transition-colors"
+            >
+              Alle löschen
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

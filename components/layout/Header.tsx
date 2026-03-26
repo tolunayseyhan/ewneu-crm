@@ -7,6 +7,58 @@ import { Badge } from "@/components/ui/badge";
 import { CommandPalette } from "./CommandPalette";
 import { NotificationPanel } from "./NotificationPanel";
 
+export interface Notification {
+  id: string;
+  typ: "aufgabe" | "anruf" | "besuch" | "angebot";
+  titel: string;
+  text: string;
+  zeit: string;
+  gelesen: boolean;
+}
+
+const INITIAL_NOTIFICATIONS: Notification[] = [
+  {
+    id: "1",
+    typ: "aufgabe",
+    titel: "Aufgabe fällig",
+    text: "Angebot nachfassen – Müller & Söhne GmbH",
+    zeit: "vor 10 Min.",
+    gelesen: false,
+  },
+  {
+    id: "2",
+    typ: "anruf",
+    titel: "Anruf überfällig",
+    text: "Fischer Elektronik KG – seit 2 Tagen offen",
+    zeit: "vor 2 Std.",
+    gelesen: false,
+  },
+  {
+    id: "3",
+    typ: "angebot",
+    titel: "Neues Angebot",
+    text: "Schneider Logistik AG – ANG-2026-0042",
+    zeit: "gestern",
+    gelesen: false,
+  },
+  {
+    id: "4",
+    typ: "besuch",
+    titel: "Besuch morgen",
+    text: "Weber Bau GmbH – 10:00 Uhr geplant",
+    zeit: "gestern",
+    gelesen: true,
+  },
+  {
+    id: "5",
+    typ: "aufgabe",
+    titel: "Aufgabe erledigt",
+    text: "Preisliste aktualisieren – Sandra Koch",
+    zeit: "vor 2 Tagen",
+    gelesen: true,
+  },
+];
+
 interface HeaderProps {
   title: string;
   subtitle?: string;
@@ -16,11 +68,26 @@ export function Header({ title, subtitle }: HeaderProps) {
   const [showCommand, setShowCommand] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
 
   const toggleDark = () => {
     setIsDark(!isDark);
     document.documentElement.classList.toggle("dark");
   };
+
+  const handleDeleteNotification = (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const handleMarkAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, gelesen: true })));
+  };
+
+  const handleDeleteAll = () => {
+    setNotifications([]);
+  };
+
+  const unreadCount = notifications.filter((n) => !n.gelesen).length;
 
   return (
     <>
@@ -72,17 +139,23 @@ export function Header({ title, subtitle }: HeaderProps) {
               title="Benachrichtigungen"
             >
               <Bell className="w-4 h-4" />
-              <Badge
-                variant="default"
-                className="absolute -top-0.5 -right-0.5 h-4 w-4 p-0 text-[9px] flex items-center justify-center rounded-full bg-[#E3000F] text-white border-0 pointer-events-none"
-              >
-                3
-              </Badge>
+              {unreadCount > 0 && (
+                <Badge
+                  variant="default"
+                  className="absolute -top-0.5 -right-0.5 h-4 w-4 p-0 text-[9px] flex items-center justify-center rounded-full bg-[#E3000F] text-white border-0 pointer-events-none"
+                >
+                  {unreadCount}
+                </Badge>
+              )}
             </Button>
 
             <NotificationPanel
               open={showNotifications}
               onClose={() => setShowNotifications(false)}
+              notifications={notifications}
+              onDelete={handleDeleteNotification}
+              onMarkAllRead={handleMarkAllRead}
+              onDeleteAll={handleDeleteAll}
             />
           </div>
         </div>
